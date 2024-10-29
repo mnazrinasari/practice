@@ -58,17 +58,21 @@ const totalDepositAmount = Number(depositAmount) + originalAmountDeposited;
 console.log(totalDepositAmount);
 expect(amountDeposited).toEqual(Number(totalDepositAmount));
 
-//writhdrawal scenario
+//withdrawal scenario
+
 await page.locator("[ng-click='withdrawl()']").click();
 await page.waitForTimeout(5000);
+// expect(page.getByText('Amount to be Withdrawn :')).toBeVisible();
 
 const actionDesc = await page.locator("[class='form-group']").textContent();
 const exceedAmount = "5000";
 await page.locator("[type='number']").fill(exceedAmount);
+// await page.getByRole('button', { name: 'Withdraw', exact: true }).click();
+
 await page.locator("[type='submit']").click();
 const errorMessage = await page.locator("[ng-show='message']").textContent();
 expect(errorMessage).toEqual("Transaction Failed. You can not withdraw amount more than the balance.");
-const withdrawAmount = "5"
+const withdrawAmount = "5";
 await page.locator("[type='number']").fill(withdrawAmount);
 await page.locator("[type='submit']").click();
 await page.locator("[type='number']").fill(withdrawAmount);
@@ -83,24 +87,22 @@ console.log(balance);
 
 await page.locator("[ng-click='transactions()']").click();
 
-//element not found handling
+// expect (rows).toHaveCount(rowCount);
+
+// element not found handling
 try {
-  // Try to locate the element
+  // await page.waitForSelector("tbody tr");
   await page.waitForSelector("tbody tr", { timeout: 2000 });
-  console.log('Element found!');
+  console.log('Element found');
 } catch (error) {
-  // If the element is not found, refresh the page
-  console.log('Element not found, refreshing the page...');
+  console.log('Element not found, reloading the page...');
   await page.reload();
 }
 
-await page.pause();
-
-
-let depositTotal = 0;
-let withdrawTotal = 0;
 const rows =  page.locator("tbody tr");
 const rowCount = await rows.count();
+let depositTotal = 0;
+let withdrawTotal = 0;
 for(let i=0; i<rowCount; i++){
   const lineRow =  rows.nth(i).locator("td");
   const type = await lineRow.nth(2).textContent();
@@ -134,3 +136,28 @@ console.log(`Amount Withdrawn:${withdrawTotal}`);
 
 
 // });
+
+test.only('sweetshop', async ({ page }) => {
+  await page.goto("https://sweetshop.netlify.app/");
+  const allProducts = page.locator("[class='card']");
+  const productCount = await allProducts.count();
+  let productList = [];
+  let productAddtoCart = 0;
+
+  for(let i=0; i<productCount; i++){
+    const productName = await allProducts.nth(i).locator("[class='card-title']").textContent();
+    if(productName.trim() === "Chocolate Cups"){
+      await allProducts.nth(i).locator("[class='btn btn-success btn-block addItem']").click();
+      productList.push(productName);
+      productAddtoCart ++; 
+    } 
+  }
+  console.log(productList);
+
+
+  const numberOfCart = Number(await page.locator("[class='badge badge-success']").textContent());
+  console.log(numberOfCart);
+  console.log(productAddtoCart);
+  expect(productAddtoCart).toEqual(numberOfCart);
+
+});
