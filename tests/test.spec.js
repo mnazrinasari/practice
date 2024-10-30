@@ -137,7 +137,7 @@ console.log(`Amount Withdrawn:${withdrawTotal}`);
 
 // });
 
-test.only('sweetshop', async ({ page }) => {
+test('sweetshop', async ({ page }) => {
   await page.goto("https://sweetshop.netlify.app/");
   const allProducts = page.locator("[class='card']");
   const productCount = await allProducts.count();
@@ -161,3 +161,107 @@ test.only('sweetshop', async ({ page }) => {
   expect(productAddtoCart).toEqual(numberOfCart);
 
 });
+
+
+test('attribute', async ({ page }) => {
+  await page.goto("https://www.saucedemo.com/v1/inventory.html");
+  const images = await page.$$('img.inventory_item_img');
+  let count = images.length;
+  const targetSrcValue = "./img/bolt-shirt-1200x1500.jpg";
+
+  // Iterate through the images and get the src attribute values
+  for (let i=0; i<count; i++){
+    // const srcValue = await img.getAttribute('src');
+    const srcValue = await images[i].getAttribute('src');
+    if (srcValue.includes(targetSrcValue)) {
+      console.log('Matching src attribute value found:', srcValue);
+      await page.locator("[class='btn_primary btn_inventory']").nth(i).click();
+      }
+  
+    }
+await page.pause();
+});
+
+
+
+
+test.only('order', async ({ page }) => {
+  await page.goto("https://rahulshettyacademy.com/client/");
+  await page.locator('[type="email"]').fill("test1234321@gmail.com");
+  await page.locator('[type="password"]').fill("Password32!");
+  await page.locator('[type="submit"]').click();
+  const allProducts = page.locator("[class='card']");
+  const product = "ADIDAS ORIGINAL";
+  const productCount = await allProducts.count();
+  // console.log(productCount);
+  // const productCount = 4;
+  for(let i=0; i<productCount; i++){
+    const productToAdd = await allProducts.nth(i).locator("div h5 b").textContent();
+    if(productToAdd === product){
+      await page.locator("[class='btn w-10 rounded']").nth(i).click();
+    }
+    }
+
+  await page.locator("[routerlink='/dashboard/cart']").click();
+  await page.locator("[class='btn btn-primary']").nth(2).click();
+  await page.locator("[placeholder='Select Country']").pressSequentially("Ind");
+  const dropdown =  page.locator(".ta-results");
+  await dropdown.waitFor();
+  await dropdown.locator("button").nth(1).click();
+    // const optionsCount = await this.dropdown.locator("button").count();
+    // for(let i =0;i< optionsCount; ++i)
+    // {
+    //   const  text =  await this.dropdown.locator("button").nth(i).textContent();
+    //     if(text.trim() === countryName)
+    //     {
+    //        await this.dropdown.locator("button").nth(i).click(
+
+  // expect(page.locator("[class='ta-item list-group-item ng-star-inserted']")).toBeVisible();
+  // await page.locator("[class='ng-star-inserted']").nth(1).click();
+  await page.locator("[class='btnn action__submit ng-star-inserted']").click();
+  const orderNumber = await page.locator("[class='ng-star-inserted']").nth(2).textContent();
+  let cleanOrderNumber = orderNumber.replace(/\|/g, "").trim();
+  console.log(cleanOrderNumber);
+  await page.locator("[routerlink='/dashboard/myorders']").nth(1).click();
+
+  const allOrder =  page.locator("tbody tr");
+  const allOrderCount = await allOrder.count();
+  console.log(allOrderCount);
+  for(let i=0; i<6; i++){
+    const order = await allOrder.nth(i).locator("th").textContent();
+    console.log(order);
+    if(order.includes(cleanOrderNumber)){
+      console.log("Order Found");
+    }
+    else{
+      console.log("order not found");
+    }
+  }
+
+  // await page.pause();
+});
+
+
+
+
+
+
+
+  // let destinationList = [];
+
+  // for(let i=0; i<destinationCount; i++){
+  //   const productName = await allProducts.nth(i).locator("[class='card-title']").textContent();
+  //   if(productName.trim() === "Chocolate Cups"){
+  //     await allProducts.nth(i).locator("[class='btn btn-success btn-block addItem']").click();
+  //     productList.push(productName);
+  //   } 
+  // }
+  // console.log(productList);
+
+
+  // const numberOfCart = Number(await page.locator("[class='badge badge-success']").textContent());
+  // console.log(numberOfCart);
+  // console.log(productAddtoCart);
+  // expect(productAddtoCart).toEqual(numberOfCart);
+
+// });
