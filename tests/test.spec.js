@@ -179,7 +179,6 @@ test('attribute', async ({ page }) => {
       }
   
     }
-await page.pause();
 });
 
 
@@ -289,7 +288,7 @@ test('automationexercise - add to cart', async ({ page }) => {
       // console.log(productName);
       if(productName === produk){
         productAddToCart.push(productName);
-        await allProducts.nth(i).locator("div a").first().click();
+        await allProducts.nth(i).locator("div a").nth(0).click();
       }
     }
   }
@@ -297,7 +296,6 @@ test('automationexercise - add to cart', async ({ page }) => {
   // const productNames = allProductNames.allTextContents();
   console.log(productAddToCart);
   await page.locator("[href='/view_cart']").nth(0).click();
-  await page.pause();
 
 });
 
