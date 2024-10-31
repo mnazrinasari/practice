@@ -267,7 +267,7 @@ test('expedia', async ({ page }) => {
 });
 
 
-test.only('automationexercise', async ({ page }) => {
+test('automationexercise - add to cart', async ({ page }) => {
   await page.goto("https://automationexercise.com/");
   await page.locator("[href='/login']").click();
   await page.locator("[data-qa='login-email']").fill("test33@test.com");
@@ -298,6 +298,62 @@ test.only('automationexercise', async ({ page }) => {
   console.log(productAddToCart);
   await page.locator("[href='/view_cart']").nth(0).click();
   await page.pause();
+
+});
+
+
+
+test.only('automationexercise-search products', async ({ page }) => {
+  await page.goto("https://automationexercise.com/");
+  await page.locator("[href='/login']").click();
+  await page.locator("[data-qa='login-email']").fill("test33@test.com");
+  await page.locator("[data-qa='login-password']").fill("test33");
+  await page.locator("[data-qa='login-button']").click();
+  await page.locator("[href='/products']").click();
+  const productNames = ["Sleeveless Dress", "Sleeveless Unicorn Patch Gown - Pink", "Sleeveless Unicorn Print Fit & Flare Net Dress - Multi"];
+  await page.locator("[id='search_product']").fill("Sleeveless");
+  await page.locator("[id='submit_search']").click();
+
+
+  const allProducts = page.locator("[class='single-products']");
+  const countProducts = await allProducts.count();
+  // const allProductNames = page.locator("[class='productinfo text-center']");
+  let productAddToCart = [];
+  for(let i=0; i<countProducts; i++){
+    let productName = await allProducts.nth(i).locator("div p").nth(0).textContent();
+    productAddToCart.push(productName);
+    }
+
+
+// productAddToCart.push(productName);
+    
+  // const productNames = allProductNames.allTextContents();
+  console.log(productAddToCart);
+  console.log(productNames);
+  expect(productAddToCart).toEqual(productNames);
+ 
+
+  let arraysEqual = true;
+  if (productNames.length !== productAddToCart.length) {
+      arraysEqual = false;
+  } else {
+      for (let i = 0; i < productNames.length; i++) {
+          if (productNames[i].trim() !== productAddToCart[i].trim()) {
+              arraysEqual = false;
+              break;
+          }
+      }
+    }
+
+
+  console.log(arraysEqual);
+  if(arraysEqual = true){
+    console.log("Product search match");
+  }
+  else{
+    console.log("Product search not match");
+  }
+
 
 });
 
