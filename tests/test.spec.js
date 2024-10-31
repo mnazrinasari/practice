@@ -185,7 +185,7 @@ await page.pause();
 
 
 
-test.only('order', async ({ page }) => {
+test('order', async ({ page }) => {
   await page.goto("https://rahulshettyacademy.com/client/");
   await page.locator('[type="email"]').fill("test1234321@gmail.com");
   await page.locator('[type="password"]').fill("Password32!");
@@ -207,14 +207,15 @@ test.only('order', async ({ page }) => {
   await page.locator("[placeholder='Select Country']").pressSequentially("Ind");
   const dropdown =  page.locator(".ta-results");
   await dropdown.waitFor();
-  await dropdown.locator("button").nth(1).click();
-    // const optionsCount = await this.dropdown.locator("button").count();
-    // for(let i =0;i< optionsCount; ++i)
-    // {
-    //   const  text =  await this.dropdown.locator("button").nth(i).textContent();
-    //     if(text.trim() === countryName)
-    //     {
-    //        await this.dropdown.locator("button").nth(i).click(
+  const countries =  dropdown.locator("button");
+  const countryCount = await countries.count();
+  for(let i=0; i<countryCount; i++){
+    const country = await countries.nth(i).textContent();
+    if(country.trim() === "India"){
+      countries.nth(i).click();
+    }
+  }
+
 
   // expect(page.locator("[class='ta-item list-group-item ng-star-inserted']")).toBeVisible();
   // await page.locator("[class='ng-star-inserted']").nth(1).click();
@@ -226,23 +227,44 @@ test.only('order', async ({ page }) => {
 
   const allOrder =  page.locator("tbody tr");
   const allOrderCount = await allOrder.count();
+  let productInfo;
   console.log(allOrderCount);
   for(let i=0; i<6; i++){
     const order = await allOrder.nth(i).locator("th").textContent();
     console.log(order);
     if(order.includes(cleanOrderNumber)){
       console.log("Order Found");
+      productInfo = await allOrder.nth(i).locator("td").allTextContents();
+      // productInfo.push(order);
     }
-    else{
-      console.log("order not found");
-    }
+  break;
   }
 
-  // await page.pause();
+  console.log(`Product Name: ${productInfo[1]}, priced at ${productInfo[2]}, order at ${productInfo[3]}`);
 });
 
+//test not working due to bot detection
+test('expedia', async ({ page }) => {
+  await page.goto("https://www.expedia.com/");
+  await page.locator("[data-stid='destination_form_field-menu-trigger']").click();
+  await page.locator("[data-stid='destination_form_field-menu-input']").pressSequentially("Seoul");
+  const allResults = page.locator("[data-stid='destination_form_field-results']");
+  await allResults.waitFor();
+  const results = await page.$$("button.destination_form_field-result-item-button");
+  const matchingResult = results.getAttribute("aria-label");
+  let count = await results.length();
+  for (let i=0; i<count; i++){
+    // const srcValue = await img.getAttribute('src');
+    const matchingResult = results[i].getAttribute("aria-label");
+    if (matchingResult.includes("Seoul (ICN - Incheon Intl.) South Korea")) {
+      console.log('Matching src attribute value found:', matchingResult);
+      await results[i].click();
+      }
+  
+    }
 
 
+});
 
 
 
