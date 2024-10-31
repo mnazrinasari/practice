@@ -267,6 +267,39 @@ test('expedia', async ({ page }) => {
 });
 
 
+test.only('automationexercise', async ({ page }) => {
+  await page.goto("https://automationexercise.com/");
+  await page.locator("[href='/login']").click();
+  await page.locator("[data-qa='login-email']").fill("test33@test.com");
+  await page.locator("[data-qa='login-password']").fill("test33");
+  await page.locator("[data-qa='login-button']").click();
+  const productNames = ["Sleeveless Dress", "Winter Top", "Frozen Tops For Kids"];
+
+  const allProducts = page.locator("[class='single-products']");
+  const countProducts = await allProducts.count();
+  // const allProductNames = page.locator("[class='productinfo text-center']");
+  let productAddToCart = [];
+  for(const produk of productNames){
+    for(let i=0; i<countProducts; i++){
+      let productName = await allProducts.nth(i).locator("div p").allTextContents();
+      if (productName.length >= 2 && productName[0] === productName[1]) {
+        productName.splice(1, 1); 
+        productName = productName[0]
+    }
+      // console.log(productName);
+      if(productName === produk){
+        productAddToCart.push(productName);
+        await allProducts.nth(i).locator("div a").first().click();
+      }
+    }
+  }
+    
+  // const productNames = allProductNames.allTextContents();
+  console.log(productAddToCart);
+  await page.locator("[href='/view_cart']").nth(0).click();
+  await page.pause();
+
+});
 
 
   // let destinationList = [];
