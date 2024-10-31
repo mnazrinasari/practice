@@ -244,27 +244,27 @@ test('order', async ({ page }) => {
 });
 
 //test not working due to bot detection
-test('expedia', async ({ page }) => {
-  await page.goto("https://www.expedia.com/");
-  await page.locator("[data-stid='destination_form_field-menu-trigger']").click();
-  await page.locator("[data-stid='destination_form_field-menu-input']").pressSequentially("Seoul");
-  const allResults = page.locator("[data-stid='destination_form_field-results']");
-  await allResults.waitFor();
-  const results = await page.$$("button.destination_form_field-result-item-button");
-  const matchingResult = results.getAttribute("aria-label");
-  let count = await results.length();
-  for (let i=0; i<count; i++){
-    // const srcValue = await img.getAttribute('src');
-    const matchingResult = results[i].getAttribute("aria-label");
-    if (matchingResult.includes("Seoul (ICN - Incheon Intl.) South Korea")) {
-      console.log('Matching src attribute value found:', matchingResult);
-      await results[i].click();
-      }
+// test('expedia', async ({ page }) => {
+//   await page.goto("https://www.expedia.com/");
+//   await page.locator("[data-stid='destination_form_field-menu-trigger']").click();
+//   await page.locator("[data-stid='destination_form_field-menu-input']").pressSequentially("Seoul");
+//   const allResults = page.locator("[data-stid='destination_form_field-results']");
+//   await allResults.waitFor();
+//   const results = await page.$$("button.destination_form_field-result-item-button");
+//   const matchingResult = results.getAttribute("aria-label");
+//   let count = await results.length();
+//   for (let i=0; i<count; i++){
+//     // const srcValue = await img.getAttribute('src');
+//     const matchingResult = results[i].getAttribute("aria-label");
+//     if (matchingResult.includes("Seoul (ICN - Incheon Intl.) South Korea")) {
+//       console.log('Matching src attribute value found:', matchingResult);
+//       await results[i].click();
+//       }
   
-    }
+//     }
 
 
-});
+// });
 
 
 test('automationexercise - add to cart', async ({ page }) => {
@@ -303,7 +303,7 @@ test('automationexercise - add to cart', async ({ page }) => {
 
 
 
-test.only('automationexercise-search products', async ({ page }) => {
+test('automationexercise-search products', async ({ page }) => {
   await page.goto("https://automationexercise.com/");
   await page.locator("[href='/login']").click();
   await page.locator("[data-qa='login-email']").fill("test33@test.com");
