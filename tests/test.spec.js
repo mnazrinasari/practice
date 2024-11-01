@@ -356,6 +356,49 @@ test('automationexercise-search products', async ({ page }) => {
 });
 
 
+test.only('rahulshetty academy', async ({ page }) => {
+  await page.goto("https://rahulshettyacademy.com/angularpractice/shop");
+  const allProducts = page.locator("[class='card h-100']");
+  const productCount = await allProducts.count();
+  for(let i=0; i<productCount; i++){
+    const productName =  await allProducts.nth(i).locator("div h4").textContent();
+    if(productName.trim() === "Nokia Edge"){
+      await allProducts.nth(i).locator("div button").click();
+      console.log("Added to cart");
+
+
+    }
+  }
+  await page.locator("[class='nav-link btn btn-primary']").click();
+  await page.locator("[class='btn btn-success']").click();
+  await page.locator("[id='country']").pressSequentially("Ind");
+  const allCountries = page.locator("[class='suggestions']");
+  const allCountriesName = allCountries.locator("ul");
+  await allCountries.waitFor();
+  const count = await allCountriesName.count();
+  console.log(count);
+  for(let i=0; i<count; i++){
+    const country =  allCountriesName.nth(i).locator("li a");
+    const countryName = await country.textContent();
+    if(countryName.trim() === "Indonesia"){
+      await country.click();
+      console.log("Country selected");
+      break;
+
+    }
+    
+  }
+
+  await page.locator("[for='checkbox2']").click();
+  await page.locator("[type='submit']").click()
+  const success = await page.locator("[class='alert alert-success alert-dismissible']").textContent();
+  const expectedSucess = "Thank you! Your order will be delivered in next few weeks :-).";
+  console.log(success);
+  expect(success.includes(expectedSucess));
+
+});
+
+
   // let destinationList = [];
 
   // for(let i=0; i<destinationCount; i++){
