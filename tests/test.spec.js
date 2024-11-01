@@ -356,7 +356,7 @@ test('automationexercise-search products', async ({ page }) => {
 });
 
 
-test.only('rahulshetty academy', async ({ page }) => {
+test('rahulshetty academy', async ({ page }) => {
   await page.goto("https://rahulshettyacademy.com/angularpractice/shop");
   const allProducts = page.locator("[class='card h-100']");
   const productCount = await allProducts.count();
@@ -395,6 +395,18 @@ test.only('rahulshetty academy', async ({ page }) => {
   const expectedSucess = "Thank you! Your order will be delivered in next few weeks :-).";
   console.log(success);
   expect(success.includes(expectedSucess));
+
+});
+
+
+
+test.only('tuiTravel', async ({ page }) => {
+  const string = "hello";
+  let reversed = "";
+  for(let i=string.length; i>=0; i--){
+    reversed += string[i]
+  }
+  console.log(reversed);
 
 });
 
