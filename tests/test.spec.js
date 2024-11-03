@@ -400,16 +400,48 @@ test('rahulshetty academy', async ({ page }) => {
 
 
 
-test.only('tuiTravel', async ({ page }) => {
-  const string = "hello";
-  let reversed = "";
-  for(let i=string.length; i>=0; i--){
-    reversed += string[i]
-  }
-  console.log(reversed);
+// test('reversed string', async ({ page }) => {
 
-});
+// const string = "hello";
+// let reversed = "";
+// for (let i = string.length; i>=0; i --){
+//   reversed += string[i]
+// }
 
+// console.log(reversed);
+
+
+// const numbers = [1, 2, 300, 4, 5];
+// let max = 0;
+
+// for(const num of numbers){
+//   if(num > max){
+//     max = num;
+//   }
+// }
+
+// console.log(max);
+// });
+
+
+
+
+
+// test('shoppee', async ({ page }) => {
+//   await page.goto("https://shopee.com.my/search?keyword=powerbank");
+//   const allProducts = page.locator("[class='shopee_ic']");
+//   await allProducts.waitFor();
+//   const count = await allProducts.count();
+//   const product = "abc";
+//   let addtoCart = "";
+//   for(let i=0; i<count; i++){
+//     const procuctName = await allProducts.nth(i).locator("div a div div dic").textContent();
+//     if(procuctName === product){
+//       await allProducts.nth(i).locator("button").click()
+//       addtoCart = procuctName;
+//     }
+//   console.log(procuctName);
+//   }
 
   // let destinationList = [];
 
@@ -427,5 +459,83 @@ test.only('tuiTravel', async ({ page }) => {
   // console.log(numberOfCart);
   // console.log(productAddtoCart);
   // expect(productAddtoCart).toEqual(numberOfCart);
+
+// });
+
+
+// test.only('test', async ({ page }) => {
+//   await page.goto("https://www.saucedemo.com/v1/inventory.html");
+//   const images = await page.$$('div.inventory_item_name');
+//   console.log(`Found ${images.length} images`);
+
+//   for (let i = 0; i < images.length; i++) {
+//     const altText = await images[i].getAttribute('class');
+//     console.log(`Alt attribute of element ${i}: ${altText}`);
+//   }
+
+// });
+
+
+
+// test.only('expedia', async ({ page }) => {
+//   await page.goto("https://www.expedia.com/");
+//   await page.locator("[data-stid='destination_form_field-menu-trigger']").click();
+//   await page.locator("[data-stid='destination_form_field-menu-input']").pressSequentially("Seoul", { delay: 300 });
+//   const allResults = page.locator('[data-stid="destination_form_field-result-item-button"]');
+//   await allResults.waitFor();
+//   const destinations = await page.$$("button.uitk-action-list-item-link");
+//   const count = destinations.length;
+
+//   for(let i=0; i<count; i++){
+//     const destination = destinations[i].getAttribute("aria-label");
+//     console.log(destination);
+//   }
+
+
+
+
+// });
+
+test.only('booking.com', async ({ page }) => {
+  await page.goto('https://www.booking.com/');
+  await page.waitForTimeout(2000);
+  page.locator('[class="c624d7469d a0e60936ad dab7c5c6fa a3214e5942"]');
+  await page.locator('[d="m13.31 12 6.89-6.89a.93.93 0 1 0-1.31-1.31L12 10.69 5.11 3.8A.93.93 0 0 0 3.8 5.11L10.69 12 3.8 18.89a.93.93 0 0 0 1.31 1.31L12 13.31l6.89 6.89a.93.93 0 1 0 1.31-1.31z"]').click();
+  
+  await page.locator('[name="ss"]').click();
+  await page.locator('[name="ss"]').pressSequentially("Seoul", {delay: 100});
+  await page.waitForTimeout(3000);
+  const allResults =  page.locator('[data-testid="autocomplete-result"]');
+
+  await allResults.waitForSelector
+  const count = await allResults.count();
+
+  for(let i=0; i<count; i++){
+    const result =  allResults.nth(i).locator('div div');
+    const resultName = await result.allTextContents();
+    for(const destination of resultName){
+      if(destination === "Myeong-dong"){
+        console.log(`${destination}, selected`);
+        await page.locator('[role="button"]').nth(i).click()
+
+        break;
+      }
+    }
+  }
+});
+
+// test('keyboard', async ({ page }) => {
+//   await page.goto(this.website);
+//   await page.keyboard.press("s");
+//   await page.pause();
+
+
+// });
+
+// test('keyboard', async ({ page }) => {
+//   await page.goto(this.website);
+//   await page.keyboard.press("s");
+//   await page.pause();
+
 
 // });
