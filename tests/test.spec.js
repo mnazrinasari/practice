@@ -496,32 +496,57 @@ test('rahulshetty academy', async ({ page }) => {
 
 // });
 
-test.only('booking.com', async ({ page }) => {
-  await page.goto('https://www.booking.com/');
-  await page.waitForTimeout(2000);
-  page.locator('[class="c624d7469d a0e60936ad dab7c5c6fa a3214e5942"]');
-  await page.locator('[d="m13.31 12 6.89-6.89a.93.93 0 1 0-1.31-1.31L12 10.69 5.11 3.8A.93.93 0 0 0 3.8 5.11L10.69 12 3.8 18.89a.93.93 0 0 0 1.31 1.31L12 13.31l6.89 6.89a.93.93 0 1 0 1.31-1.31z"]').click();
+// test.only('booking.com', async ({ page }) => {
+//   await page.goto('https://www.booking.com/');
+//   await page.waitForTimeout(2000);
+//   page.locator('[class="c624d7469d a0e60936ad dab7c5c6fa a3214e5942"]');
+//   await page.locator('[d="m13.31 12 6.89-6.89a.93.93 0 1 0-1.31-1.31L12 10.69 5.11 3.8A.93.93 0 0 0 3.8 5.11L10.69 12 3.8 18.89a.93.93 0 0 0 1.31 1.31L12 13.31l6.89 6.89a.93.93 0 1 0 1.31-1.31z"]').click();
   
-  await page.locator('[name="ss"]').click();
-  await page.locator('[name="ss"]').pressSequentially("Seoul", {delay: 100});
-  await page.waitForTimeout(3000);
-  const allResults =  page.locator('[data-testid="autocomplete-result"]');
+//   await page.locator('[name="ss"]').click();
+//   await page.locator('[name="ss"]').pressSequentially("Seoul", {delay: 100});
+//   await page.waitForTimeout(3000);
+//   const allResults =  page.locator('[data-testid="autocomplete-result"]');
 
-  await allResults.waitForSelector
-  const count = await allResults.count();
+//   await allResults.waitForSelector
+//   const count = await allResults.count();
 
-  for(let i=0; i<count; i++){
-    const result =  allResults.nth(i).locator('div div');
-    const resultName = await result.allTextContents();
-    for(const destination of resultName){
-      if(destination === "Myeong-dong"){
-        console.log(`${destination}, selected`);
-        await page.locator('[role="button"]').nth(i).click()
+//   for(let i=0; i<count; i++){
+//     const result =  allResults.nth(i).locator('div div');
+//     const resultName = await result.allTextContents();
+//     for(const destination of resultName){
+//       if(destination === "Myeong-dong"){
+//         console.log(`${destination}, selected`);
+//         await page.locator('[role="button"]').nth(i).click()
 
-        break;
-      }
-    }
+//         break;
+//       }
+//     }
+//   }
+// });
+
+test.only('verify text', async ({ page }) => {
+  await page.goto('https://www.saucedemo.com/');
+  await page.getByPlaceholder('Username').fill('locked_out_user');
+  await page.getByPlaceholder('Password').fill('secret_sauce');
+  await page.locator('[data-test="login-button"]').click();
+
+
+  function (VisinbleText)
+  const text = page.getByRole('heading', {name: 'Epic sadface: Sorry, this user has been locked out.'})
+  const rawText = await text.innerText();
+  const textVisible = await text.isVisible();
+
+  if(!textVisible){
+    console.log("Text is not found")
   }
+  else{
+    console.log('Text found');
+    console.log(rawText.trim());
+    await expect(text).toBeVisible();
+  }
+
+
+
 });
 
 // test('keyboard', async ({ page }) => {
