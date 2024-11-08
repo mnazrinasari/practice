@@ -57,6 +57,7 @@ const productNames = ["Sleeveless Dress", "Winter Top", "Frozen Tops For Kids"];
 const allProducts = page.locator("[class='single-products']");
 const countProducts = await allProducts.count();
 let productAddToCart = [];
+let lastMatchingIndex = -1;
 
 for (let i = 0; i < countProducts; i++) {
   const productNameElements = await allProducts.nth(i).locator("div p").nth(1).allTextContents();
@@ -65,20 +66,37 @@ for (let i = 0; i < countProducts; i++) {
     for (const productName of productNames) {
       if (name.trim() === productName) {
         productAddToCart.push(name.trim());
+        lastMatchingIndex = i; 
         await allProducts.nth(i).locator("div a").nth(0).click();
+        
+        if (i < countProducts - 1) {
+          const modal = page.locator("[class='btn btn-success close-modal btn-block']");
+          await modal.waitFor({ state: 'attached' });
+          await modal.waitFor({ state: 'visible' });
+          await modal.click();
+          console.log("clicked");
+        }
         break;
       }
     }
   }
 }
 
+// 9. Click 'Cart' button
+if (lastMatchingIndex !== -1) {
+  await allProducts.nth(lastMatchingIndex).locator("div a").nth(0).click();
+  const modal = page.locator("p a");
+  await modal.waitFor({ state: 'attached' });
+  await modal.waitFor({ state: 'visible' });
+  await modal.click();
+}
+
 
 console.log(productAddToCart);
-// 9. Click 'Cart' button
-const modal =  page.locator("p a");
-await modal.waitFor({ state: 'attached' });
-await modal.waitFor({ state: 'visible' });
-await modal.click();
+// const modal =  page.locator("p a");
+// await modal.waitFor({ state: 'attached' });
+// await modal.waitFor({ state: 'visible' });
+// await modal.click();
 // 10. Verify that cart page is displayed
 const cartVisible =  page.locator("[class='active']");
 expect(await cartVisible).toBeVisible();
@@ -121,26 +139,67 @@ await page.locator("[data-qa='continue-button']").click();
 
 
 
-test('automationexercise-search products', async ({ page }) => {
+test('Test Case 20: Search Products and Verify Cart After Login', async ({ page }) => {
   await page.goto("https://automationexercise.com/");
-  await page.locator("[href='/login']").click();
-  await page.locator("[data-qa='login-email']").fill("test33@test.com");
-  await page.locator("[data-qa='login-password']").fill("test33");
-  await page.locator("[data-qa='login-button']").click();
+  // await page.locator("[href='/login']").click();
+  // await page.locator("[data-qa='login-email']").fill("test33@test.com");
+  // await page.locator("[data-qa='login-password']").fill("test33");
+  // await page.locator("[data-qa='login-button']").click();
   await page.locator("[href='/products']").click();
   const productNames = ["Sleeveless Dress", "Sleeveless Unicorn Patch Gown - Pink", "Sleeveless Unicorn Print Fit & Flare Net Dress - Multi"];
   await page.locator("[id='search_product']").fill("Sleeveless");
   await page.locator("[id='submit_search']").click();
 
-
   const allProducts = page.locator("[class='single-products']");
   const countProducts = await allProducts.count();
-  // const allProductNames = page.locator("[class='productinfo text-center']");
   let productAddToCart = [];
-  for(let i=0; i<countProducts; i++){
-    let productName = await allProducts.nth(i).locator("div p").nth(0).textContent();
-    productAddToCart.push(productName);
+  let lastMatchingIndex = -1;
+
+
+  
+  for (let i = 0; i < countProducts; i++) {
+    const productNameElements = await allProducts.nth(i).locator("div p").nth(1).allTextContents();
+    
+    for (const name of productNameElements) {
+        if (name.trim().includes("Sleeveless")) {
+            productAddToCart.push(name.trim());
+            lastMatchingIndex = i; 
+            await allProducts.nth(i).locator("div a").nth(0).click();
+            
+            if (i < countProducts - 1) {
+              const modal = page.locator("[class='btn btn-success close-modal btn-block']");
+              await modal.waitFor({ state: 'attached' });
+              await modal.waitFor({ state: 'visible' });
+              await modal.click();
+              console.log("clicked");
+            }
+            break;
+          }
+        }
+      }
+    
+    // 9. Click 'Cart' button
+    if (lastMatchingIndex !== -1) {
+      await allProducts.nth(lastMatchingIndex).locator("div a").nth(0).click();
+      const modal = page.locator("p a");
+      await modal.waitFor({ state: 'attached' });
+      await modal.waitFor({ state: 'visible' });
+      await modal.click();
     }
+    
+
+console.log(productAddToCart);
+await page.pause();
+
+
+  // const allProducts = page.locator("[class='single-products']");
+  // const countProducts = await allProducts.count();
+  // // const allProductNames = page.locator("[class='productinfo text-center']");
+  // let productAddToCart = [];
+  // for(let i=0; i<countProducts; i++){
+  //   let productName = await allProducts.nth(i).locator("div p").nth(0).textContent();
+  //   productAddToCart.push(productName);
+  //   }
 
 
 // productAddToCart.push(productName);
@@ -172,6 +231,22 @@ test('automationexercise-search products', async ({ page }) => {
     console.log("Product search not match");
   }
 
+
+});
+
+
+test('keyboard', async ({ page }) => {
+  await page.goto("https://automationexercise.com/");
+  // await page.locator("[href='/login']").click();
+  // await page.locator("[data-qa='login-email']").fill("test33@test.com");
+  // await page.locator("[data-qa='login-password']").fill("test33");
+  // await page.locator("[data-qa='login-button']").click();
+  await page.locator("[href='/products']").click();
+  const productNames = ["Sleeveless Dress", "Sleeveless Unicorn Patch Gown - Pink", "Sleeveless Unicorn Print Fit & Flare Net Dress - Multi"];
+  await page.locator("[id='search_product']").fill("Fancy Green Top");
+  await page.locator("[id='submit_search']").click();
+  const product = await page.locator(".overlay-content p").textContent();
+  console.log(product);
 
 });
 
