@@ -357,7 +357,6 @@ await page.locator("[class='btn btn-default check_out']").click();
 // 12. Verify that the delivery address is same address filled at the time registration of account
 const deliveryAddress = page.locator("[id='address_delivery']");
 const deliveryElements = deliveryAddress.locator("li");
-const count = 8;
 console.log(count);
 let retrievedDeliveryAddress = [];
 for(let i=0; i<count; i++){
@@ -397,7 +396,6 @@ expect(expectedDeliveryAddress).toEqual(retrievedDeliveryAddress);
 const billingAddress = page.locator("[id='address_invoice']");
 const billingAddressElements = billingAddress.locator("li");
 const counter = 8;
-console.log(count);
 let retrievedBillingAddress = [];
 for(let i=0; i<counter; i++){
   const addressDetail = await billingAddressElements.nth(i).textContent();
