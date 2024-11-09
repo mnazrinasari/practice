@@ -266,7 +266,7 @@ for(let i=0; i<counter; i++){
 
 
 
-test.only('Test Case 23: Verify address details in checkout page', async ({ page }) => {
+test('Test Case 23: Verify address details in checkout page', async ({ page }) => {
 // 1. Launch browser
 // 2. Navigate to url 'http://automationexercise.com'
 await page.goto("https://automationexercise.com/");
@@ -426,8 +426,8 @@ const expectedBillingAddress = [
   mobileNumber
 ];
 
-// console.log(retrievedDeliveryAddress);
-// console.log(expectedDeliveryAddress);
+// console.log(retrievedBillingAddress);
+// console.log(expectedBillingAddress);
 expect(expectedBillingAddress).toEqual(retrievedBillingAddress);
 
 // 14. Click 'Delete Account' button
