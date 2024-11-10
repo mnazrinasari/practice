@@ -44,7 +44,7 @@ async addSearchedProducttoCart(searchProductData)
                 } else {
     // 9. Click 'Cart' button and verify that products are visible in cart
                 const modal = this.viewCartModal;
-                await modal.waitFor({ state: 'attached' });
+                // await modal.waitFor({ state: 'attached' });
                 await modal.waitFor({ state: 'visible' });
                 await modal.click();
                 console.log("last product clicked");

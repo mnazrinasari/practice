@@ -67,7 +67,7 @@ async addRandomProductToCart(randomProductData)
     // 9. Click 'Cart' button
             } else {
             const modal = this.viewCartModal;
-            await modal.waitFor({ state: 'attached' });
+            // await modal.waitFor({ state: 'attached' });
             await modal.waitFor({ state: 'visible' });
             await modal.click();
             console.log("last product clicked");
