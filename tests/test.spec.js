@@ -8,7 +8,6 @@ function generateUsername() {
   return `user_${timestamp}_${randomNum}`;
 }
 
-
 function cleanAddressEntry(entry) {
   return entry.replace(/\s+/g, ' ').trim().replace(/, 0000$/, '');
 }
@@ -223,7 +222,6 @@ for (let i = 0; i < countProducts; i++) {
         if (name.trim().includes("Sleeveless")) {
             productAddToCart.push(name.trim());
             await allProducts.nth(i).locator("div a").nth(0).click();
-            //
             if (productAddToCart.length < productNames.length) {
               const modal = page.locator("[class='btn btn-success close-modal btn-block']");
               await modal.waitFor({ state: 'attached' });
@@ -243,6 +241,8 @@ for (let i = 0; i < countProducts; i++) {
         }
       }
 expect(productInResult).toEqual(productNames); 
+expect(productAddToCart).toEqual(productNames); 
+
 
   
 
