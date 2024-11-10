@@ -243,9 +243,6 @@ for (let i = 0; i < countProducts; i++) {
 expect(productInResult).toEqual(productNames); 
 expect(productAddToCart).toEqual(productNames); 
 
-
-  
-
 // 10. Click 'Signup / Login' button and submit login details
 const signupLoginLink = page.getByRole('link', { name: 'Signup / Login' });
 await signupLoginLink.click();
@@ -253,9 +250,7 @@ await page.locator("[data-qa='login-email']").fill("test33@test.com");
 await page.locator("[data-qa='login-password']").fill("test33");
 await page.locator("[data-qa='login-button']").click();
 
-
 // 11. Again, go to Cart page
-
 await page.locator("[href='/view_cart']").first().click();
 
 // 12. Verify that those products are visible in cart after login as well
@@ -271,9 +266,7 @@ for(let i=0; i<count; i++){
 // console.log(productInCart);
 expect(productInCart).toEqual(productAddToCart);
 
-
 // Additional step : Delete all products from cart for fresh new test
-
 const deleteButton = page.locator("[class='cart_quantity_delete']");
 const counter = await deleteButton.count();
 for(let i=0; i<counter; i++){
