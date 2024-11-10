@@ -256,7 +256,6 @@ await page.locator("[href='/view_cart']").first().click();
 // 12. Verify that those products are visible in cart after login as well
 const allCartProducts = page.locator("[class='cart_description']");
 const count = await allCartProducts.count();
-console.log(count);
 let productInCart = [];
 for(let i=0; i<count; i++){
   const productName = await allCartProducts.nth(i).locator("h4 a").textContent();
@@ -379,7 +378,6 @@ retrievedDeliveryAddress = cleanSpecificEntry(retrievedDeliveryAddress);
 // console.log(retrievedDeliveryAddress);
 // console.log(expectedDeliveryAddress);
 expect(expectedAddress).toEqual(retrievedDeliveryAddress);
-
 
 
 // 13. Verify that the billing address is same address filled at the time registration of account
