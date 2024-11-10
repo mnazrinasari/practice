@@ -13,7 +13,20 @@ function cleanAddressEntry(entry) {
   return entry.replace(/\s+/g, ' ').trim().replace(/, 0000$/, '');
 }
 
+function cleanSpecificEntry(retrievedAddress) {
+  return retrievedAddress.map((entry, index) => {
+    if (index === 3) { 
+      return cleanAddressEntry(entry);
+    }
+    return entry;
+  });
+}
 
+function cleanAddressData(addressArray, unwantedEntry, unwantedPrefix) {
+  return addressArray.filter(entry => 
+    entry !== unwantedEntry && !entry.startsWith(unwantedPrefix)
+  );
+}
 
 //testdata
 const username = generateUsername();
@@ -29,9 +42,17 @@ const state = "state";
 const city = "city";
 const zipcode = "0000";
 const mobileNumber = "9999";
+const expectedAddress = [
+  company,
+  address,
+  address2,
+  `${city} ${state} ${zipcode}`,
+  country,
+  mobileNumber
+];
 
 
-test('Test Case 15: Place Order: Register before Checkout', async ({ page }) => {
+test.only('Test Case 15: Place Order: Register before Checkout', async ({ page }) => {
 
 // 1. Launch browser
 // 2. Navigate to url 'http://automationexercise.com'
@@ -266,7 +287,7 @@ for(let i=0; i<counter; i++){
 
 
 
-test('Test Case 23: Verify address details in checkout page', async ({ page }) => {
+test.only('Test Case 23: Verify address details in checkout page', async ({ page }) => {
 // 1. Launch browser
 // 2. Navigate to url 'http://automationexercise.com'
 await page.goto("https://automationexercise.com/");
@@ -364,31 +385,12 @@ for(let i=0; i<count; i++){
   retrievedDeliveryAddress.push(addressDetail.trim());
 }
 //cleaning the data
-retrievedDeliveryAddress = retrievedDeliveryAddress.filter(entry => 
-    entry !== 'Your delivery address' && !entry.startsWith('Mr.')
-  );
-
-
-retrievedDeliveryAddress = retrievedDeliveryAddress.map((entry, index) => {
-  if (index === 3) { 
-    return cleanAddressEntry(entry);
-  }
-    return entry;
-  });
-
-
-const expectedDeliveryAddress = [
-  company,
-  address,
-  address2,
-  `${city} ${state} ${zipcode}`,
-  country,
-  mobileNumber
-];
+retrievedDeliveryAddress = cleanAddressData(retrievedDeliveryAddress, 'Your delivery address', 'Mr.');
+retrievedDeliveryAddress = cleanSpecificEntry(retrievedDeliveryAddress);
 
 // console.log(retrievedDeliveryAddress);
 // console.log(expectedDeliveryAddress);
-expect(expectedDeliveryAddress).toEqual(retrievedDeliveryAddress);
+expect(expectedAddress).toEqual(retrievedDeliveryAddress);
 
 
 
@@ -402,31 +404,15 @@ for(let i=0; i<counter; i++){
   retrievedBillingAddress.push(addressDetail.trim());
 }
 //cleaning the data
-retrievedBillingAddress = retrievedBillingAddress.filter(entry => 
-    entry !== 'Your billing address' && !entry.startsWith('Mr.')
-  );
+retrievedBillingAddress = cleanAddressData(retrievedBillingAddress, 'Your billing address', 'Mr.');
+retrievedBillingAddress = cleanSpecificEntry(retrievedBillingAddress);
+console.log(retrievedBillingAddress);
 
 
-retrievedBillingAddress = retrievedBillingAddress.map((entry, index) => {
-  if (index === 3) { 
-    return cleanAddressEntry(entry);
-  }
-    return entry;
-  });
-
-
-const expectedBillingAddress = [
-  company,
-  address,
-  address2,
-  `${city} ${state} ${zipcode}`,
-  country,
-  mobileNumber
-];
 
 // console.log(retrievedBillingAddress);
 // console.log(expectedBillingAddress);
-expect(expectedBillingAddress).toEqual(retrievedBillingAddress);
+expect(expectedAddress).toEqual(retrievedBillingAddress);
 
 // 14. Click 'Delete Account' button
 await page.locator("[href='/delete_account']").click();
