@@ -32,7 +32,7 @@ const locators = {
     signupButton: "[data-qa='signup-button']",
     allPProducts: "[class='single-products']",
     continueModal: "[class='btn btn-success close-modal btn-block']",
-    viewCartModal: "p a",
+    viewCartModal: "[href='/view_cart']",
     deleteAccountButton: "[href='/delete_account']",
     deleteConfirmButton: "[data-qa='continue-button']"
 

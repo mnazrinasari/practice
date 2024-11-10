@@ -8,7 +8,7 @@ class ProductPage {
     this.page = page;
     this.allProducts = page.locator(locators.allProducts);
     this.continueModal = page.locator(locators.continueModal);
-    this.viewCartModal = page.locator(locators.viewCartModal);
+    this.viewCartModal = page.locator(locators.viewCartModal).nth(1);
 
     
 
