@@ -52,7 +52,7 @@ const expectedAddress = [
 ];
 
 
-test.only('Test Case 15: Place Order: Register before Checkout', async ({ page }) => {
+test('Test Case 15: Place Order: Register before Checkout', async ({ page }) => {
 
 // 1. Launch browser
 // 2. Navigate to url 'http://automationexercise.com'
@@ -287,7 +287,7 @@ for(let i=0; i<counter; i++){
 
 
 
-test.only('Test Case 23: Verify address details in checkout page', async ({ page }) => {
+test('Test Case 23: Verify address details in checkout page', async ({ page }) => {
 // 1. Launch browser
 // 2. Navigate to url 'http://automationexercise.com'
 await page.goto("https://automationexercise.com/");
@@ -406,8 +406,6 @@ for(let i=0; i<counter; i++){
 //cleaning the data
 retrievedBillingAddress = cleanAddressData(retrievedBillingAddress, 'Your billing address', 'Mr.');
 retrievedBillingAddress = cleanSpecificEntry(retrievedBillingAddress);
-console.log(retrievedBillingAddress);
-
 
 
 // console.log(retrievedBillingAddress);
