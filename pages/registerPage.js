@@ -1,29 +1,31 @@
 const {test, expect} = require('@playwright/test');
+const locators = require('../locators');
+
 
 class RegisterPage {
     constructor(page)
 {
     this.page = page;
-    this.gender = page.locator("[for='id_gender1']");
-    this.password = page.locator("[type='password']");
-    this.birthDay = page.locator("[data-qa='days']");
-    this.birthMonth = page.locator("[data-qa='months']");
-    this.birthYear = page.locator("[data-qa='years']");
-    this.firstName = page.locator("[data-qa='first_name']");
-    this.lastName = page.locator("[data-qa='last_name']");
-    this.company = page.locator("[data-qa='company']");
-    this.address = page.locator("[data-qa='address']");
-    this.address2 = page.locator("[data-qa='address2']");
-    this.country = page.locator("[data-qa='country']");
-    this.state = page.locator("[data-qa='state']");
-    this.city = page.locator("[data-qa='city']");
-    this.zipcode = page.locator("[data-qa='zipcode']");
-    this.mobileNumber = page.locator("[data-qa='mobile_number']");
-    this.createAccountButton = page.locator("[data-qa='create-account']");
+    this.gender = page.locator(locators.gender);
+    this.password = page.locator(locators.password);
+    this.birthDay = page.locator(locators.birthDay);
+    this.birthMonth = page.locator(locators.birthMonth);
+    this.birthYear = page.locator(locators.birthYear);
+    this.firstName = page.locator(locators.firstName);
+    this.lastName = page.locator(locators.lastName);
+    this.company = page.locator(locators.company);
+    this.address = page.locator(locators.address);
+    this.address2 = page.locator(locators.address2);
+    this.country = page.locator(locators.country);
+    this.state = page.locator(locators.state);
+    this.city = page.locator(locators.city);
+    this.zipcode = page.locator(locators.zipcode);
+    this.mobileNumber = page.locator(locators.mobileNumber);
+    this.createAccountButton = page.locator(locators.createAccountButton);
 
     //register completed page
     this.successCreatedMessage = page.getByRole('heading', { name: 'Account Created!' });
-    this.continue = page.locator("[data-qa='continue-button']");
+    this.continue = page.locator(locators.continue);
 
 
     

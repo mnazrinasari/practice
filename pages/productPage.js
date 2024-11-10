@@ -1,13 +1,14 @@
 
 const {test, expect} = require('@playwright/test');
+const locators = require('../locators');
 
 class ProductPage {
     constructor(page)
 {
     this.page = page;
-    this.allProducts = page.locator("[class='single-products']");
-    this.continueModal = page.locator("[class='btn btn-success close-modal btn-block']");
-    this.viewCartModal = page.locator("p a");
+    this.allProducts = page.locator(locators.allProducts);
+    this.continueModal = page.locator(locators.continueModal);
+    this.viewCartModal = page.locator(locators.viewCartModal);
 
     
 
