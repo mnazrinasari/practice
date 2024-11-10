@@ -51,7 +51,6 @@ const expectedAddress = [
   mobileNumber
 ];
 
-
 test('Test Case 15: Place Order: Register before Checkout', async ({ page }) => {
 
 // 1. Launch browser
@@ -183,8 +182,6 @@ console.log(deletedMessage);
 await page.locator("[data-qa='continue-button']").click();
 });
 
-
-
 test('Test Case 20: Search Products and Verify Cart After Login', async ({ page }) => {
 
 // 1. Launch browser
@@ -284,8 +281,6 @@ for(let i=0; i<counter; i++){
 }
 
 });
-
-
 
 test('Test Case 23: Verify address details in checkout page', async ({ page }) => {
 // 1. Launch browser
