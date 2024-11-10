@@ -1,566 +1,288 @@
 const { test, expect } = require('@playwright/test');
+const { stat } = require('fs');
+const testData = require('../testData');
+const { HomePage } = require('../pages/homePage');
+const { RegisterPage } = require('../pages/registerPage');
+const { ProductPage } = require('../pages/productPage');
 
-test('login', async ({ page  }) => {
-  const website = "https://www.globalsqa.com/angularJs-protractor/BankingProject/#/login";
-  await page.goto(website);
-  const customerLogin = page.locator("[ng-click='customer()']");
-  await customerLogin.click()
-  const nameOption = page.locator("[name='userSelect']");
-  const userSelect = "Harry Potter"
-  await nameOption.selectOption(userSelect);
-  await page.locator("[type='submit']").click();
-  const welcomeText = await page.locator("[class='fontBig ng-binding']").textContent()
-  expect(welcomeText).toEqual(userSelect);
 
-  //check account number selected 
-  const accountNumberSelected = Number(await page.locator("[selected='selected']").textContent());
-  const accountNumber = Number(await page.locator("[class='ng-binding']").nth(0).textContent());
-  expect(accountNumberSelected).toEqual(accountNumber);
- 
+function generateUsername() {
+  const date = new Date();
+  const timestamp = date.getTime();
+  const randomNum = Math.floor(Math.random() * 1000); 
+  return `user_${timestamp}_${randomNum}`;
+}
 
-  ///Check current account balance
-  const accountInfo = page.locator("[ng-hide='noAccount']");
-  const count = await accountInfo.count();
-  let amountDeposited = 0;
-  for(let i=0; i<count; i++){
-    const accountBalance = await accountInfo.nth(i).textContent();
-    if(accountBalance.trim().includes("Balance")){
-      const amountDeposit = await page.locator("[class='ng-binding']").nth(i).textContent();
-      amountDeposited += Number(amountDeposit);
+function cleanAddressEntry(entry) {
+  return entry.replace(/\s+/g, ' ').trim().replace(/, 0000$/, '');
+}
+
+function cleanSpecificEntry(retrievedAddress) {
+  return retrievedAddress.map((entry, index) => {
+    if (index === 3) { 
+      return cleanAddressEntry(entry);
     }
-  }
-  console.log(amountDeposited);
-  const originalAmountDeposited = amountDeposited;
-///
+    return entry;
+  });
+}
 
-await page.locator("[ng-click='deposit()']").click();
-const depositAmount = "100";
+function cleanAddressData(addressArray, unwantedEntry, unwantedPrefix) {
+  return addressArray.filter(entry => 
+    entry !== unwantedEntry && !entry.startsWith(unwantedPrefix)
+  );
+}
 
-await page.locator("[ng-model='amount']").fill(depositAmount);
-await page.locator("[type='submit']").click();
+//card data
+const cardNumber = "4444444444444444";
+const cardCVC = "123";
+const cardExpiryMonth = "12";
+const cardExpiryYear = "2030";
 
-const depositSucess = await page.locator("[ng-show='message']").textContent();
-expect(depositSucess).toBe("Deposit Successful");
 
-//// check current acccount balance
+test('Test Case 15: Place Order: Register before Checkout', async ({ page }) => {
+
+// 1. Launch browser
+// 2. Navigate to url 'http://automationexercise.com'
+const homepage = new HomePage(page);
+const register = new RegisterPage(page);
+
+await homepage.navigateTo(testData.environment.sourceURL);
+// 3. Verify that home page is visible successfully
+await expect(page.getByRole('heading', { name: 'Full-Fledged practice website for Automation Engineers' })).toBeVisible();
+
+// 4. Click 'Signup / Login' button
+await page.locator("[href='/login']").click();
+
+// 5. Fill all details in Signup and create account
+const username = homepage.generateUsername();
+const email = username+"@test.com";
+const cardName = username;
+
+await homepage.proceedRegisternewUser(username, email);
+await register.registernewUser(testData.registrationData);
+
+// 6. Verify 'ACCOUNT CREATED!' and click 'Continue' button
+const registerCompletedMessage = await register.completedRegister();
+console.log(registerCompletedMessage); //print account created message
+await register.completedContinue();
+
+// 7. Verify ' Logged in as username' at top
+const loggedUser = await page.locator("li:has-text('Logged in as')").textContent();
+const expectedloggedUser = `Logged in as ${username}`;
+expect(loggedUser.trim()).toEqual(expectedloggedUser);
+
+// 8. Add products to cart
+// 9. Click 'Cart' button
+const addProduct = await homepage.addRandomProductToCart(testData.productData.randomProductData);
+console.log(addProduct); //print product added to cart
+
+
+// 10. Verify that cart page is displayed
+const cartVisible =  page.locator("[class='active']");
+expect(cartVisible).toBeVisible();
+expect(await cartVisible.textContent()).toEqual("Shopping Cart");
+
+// 11. Click Proceed To Checkout
+await page.locator("[class='btn btn-default check_out']").click();
+
+// 12. Verify Address Details and Review Your Order
+// 13. Enter description in comment text area and click 'Place Order'
+await page.locator("[name='message']").fill("message");
+await page.locator("[class='btn btn-default check_out']").click();
+
+// 14. Enter payment details: Name on Card, Card Number, CVC, Expiration date
+await page.locator("[data-qa='name-on-card']").fill(cardName);
+await page.locator("[data-qa='card-number']").fill(cardNumber);
+await page.locator("[data-qa='cvc']").fill(cardCVC);
+await page.locator("[data-qa='expiry-month']").fill(cardExpiryMonth);
+await page.locator("[data-qa='expiry-year']").fill(cardExpiryYear);
+
+// 15. Click 'Pay and Confirm Order' button
+await page.locator("[data-qa='pay-button']").click();
+
+// 16. Verify success message 'Your order has been placed successfully!'
+//option1
+// const alert = await page.getByText('Your order has been placed successfully!');
+// const alertText = await alert.textContent();
+// console.log(alertText);
+
+//option2
+const text = await page.locator("[class='alert-success alert']").nth(0).textContent();
+console.log(text);
+
+//option3
+// const message = page.locator('#success_message .alert-success.alert:has-text("Your order has been placed successfully!")');
+// console.log(await message.textContent());
+// expect(await message.textContent()).toEqual("Your order has been placed successfully!");
+
+// 17. Click 'Delete Account' button
+// 18. Verify 'ACCOUNT DELETED!' and click 'Continue' button
+const deleteAccount = await homepage.deleteAccount();
+console.log(deleteAccount);
+});
+
+
+test('Test Case 20: Search Products and Verify Cart After Login', async ({ page }) => {
+
+// 1. Launch browser
+// 2. Navigate to url 'http://automationexercise.com'
+const homepage = new HomePage(page);
+const register = new RegisterPage(page);
+const product = new ProductPage(page);
+
+await homepage.navigateTo(testData.environment.sourceURL);
+// 3. Click on 'Products' button
+await page.locator("[href='/products']").click();
+// 4. Verify user is navigated to ALL PRODUCTS page successfully
+const allProductDisplayed = page.getByRole('heading', { name: 'All Products' });
+await expect(allProductDisplayed).toBeVisible();
+const allProductMessage = await allProductDisplayed.textContent();
+expect(allProductMessage ).toEqual("All Products");
+console.log(allProductMessage );
+
+// 5. Enter product name in search input and click search button
+await page.locator("[id='search_product']").fill("Sleeveless");
+await page.locator("[id='submit_search']").click();
+
+// 6. Verify 'SEARCHED PRODUCTS' is visible
+const searchedProductDisplayed = page.getByRole('heading', { name: 'Searched Products' });
+await expect(searchedProductDisplayed).toBeVisible();
+const searchedProductMessage = await searchedProductDisplayed.textContent();
+expect(searchedProductMessage ).toEqual("Searched Products");
+console.log(searchedProductMessage );
+
+// 7. Verify all the products related to search are visible
+// 8. Add those products to cart
+// 9. Click 'Cart' button and verify that products are visible in cart
+const searchProductData = testData.productData.searchProductData;
+const { productAddToCart, productInResult } = await product.addSearchedProducttoCart(searchProductData);
+console.log(productInResult);
+console.log(productAddToCart);
+
+expect(productInResult).toEqual(searchProductData);
+expect(productAddToCart).toEqual(searchProductData);
+
+// 10. Click 'Signup / Login' button and submit login details
+const signupLoginLink = page.getByRole('link', { name: 'Signup / Login' });
+await signupLoginLink.click();
+await page.locator("[data-qa='login-email']").fill(testData.loginData.existingUsername);
+await page.locator("[data-qa='login-password']").fill(testData.loginData.existingPassword);
+await page.locator("[data-qa='login-button']").click();
+
+// 11. Again, go to Cart page
+await page.locator("[href='/view_cart']").first().click();
+
+// 12. Verify that those products are visible in cart after login as well
+const allCartProducts = page.locator("[class='cart_description']");
+const count = await allCartProducts.count();
+let productInCart = [];
 for(let i=0; i<count; i++){
-  const accountBalance = await accountInfo.nth(i).textContent();
-  if(accountBalance.trim().includes("Balance")){
-    const amountDeposit = await page.locator("[class='ng-binding']").nth(i).textContent();
-    amountDeposited += Number(amountDeposit);
-  }
-}
-
-console.log(`Total Amount depositited to account ${accountNumber} by ${userSelect} is ${amountDeposited}`);
-/////
-
-const totalDepositAmount = Number(depositAmount) + originalAmountDeposited;
-console.log(totalDepositAmount);
-expect(amountDeposited).toEqual(Number(totalDepositAmount));
-
-//withdrawal scenario
-
-await page.locator("[ng-click='withdrawl()']").click();
-await page.waitForTimeout(5000);
-// expect(page.getByText('Amount to be Withdrawn :')).toBeVisible();
-
-const actionDesc = await page.locator("[class='form-group']").textContent();
-const exceedAmount = "5000";
-await page.locator("[type='number']").fill(exceedAmount);
-// await page.getByRole('button', { name: 'Withdraw', exact: true }).click();
-
-await page.locator("[type='submit']").click();
-const errorMessage = await page.locator("[ng-show='message']").textContent();
-expect(errorMessage).toEqual("Transaction Failed. You can not withdraw amount more than the balance.");
-const withdrawAmount = "5";
-await page.locator("[type='number']").fill(withdrawAmount);
-await page.locator("[type='submit']").click();
-await page.locator("[type='number']").fill(withdrawAmount);
-await page.locator("[type='submit']").click();
-
-
-const balance = Number(await page.locator("[class='ng-binding']").nth(1).textContent());
-const currentBalance = amountDeposited - Number(withdrawAmount) - Number(withdrawAmount);
-expect(currentBalance).toEqual(balance);
-console.log(currentBalance);
-console.log(balance);
-
-await page.locator("[ng-click='transactions()']").click();
-
-// expect (rows).toHaveCount(rowCount);
-
-// element not found handling
-try {
-  // await page.waitForSelector("tbody tr");
-  await page.waitForSelector("tbody tr", { timeout: 2000 });
-  console.log('Element found');
-} catch (error) {
-  console.log('Element not found, reloading the page...');
-  await page.reload();
-}
-
-const rows =  page.locator("tbody tr");
-const rowCount = await rows.count();
-let depositTotal = 0;
-let withdrawTotal = 0;
-for(let i=0; i<rowCount; i++){
-  const lineRow =  rows.nth(i).locator("td");
-  const type = await lineRow.nth(2).textContent();
-  const total = await lineRow.nth(1).textContent();
-  if(type === "Credit"){
-    const depositTotals = Number(total);
-    depositTotal += depositTotals;
-  
-
-  }
-  if(type ==="Debit"){
-    const withdrawalTotals = Number(total);
-    withdrawTotal += withdrawalTotals;
-
-
-  }
-
+  const productName = await allCartProducts.nth(i).locator("h4 a").textContent();
+  productInCart.push(productName);
 
 }
-console.log(`Amount Deposited:${depositTotal}`);
-console.log(`Amount Withdrawn:${withdrawTotal}`);
+// console.log(productInCart);
+expect(productInCart).toEqual(productAddToCart);
 
-
-
-});
-
-// test('keyboard', async ({ page }) => {
-//   await page.goto(this.website);
-//   await page.keyboard.press("s");
-//   await page.pause();
-
-
-// });
-
-test('sweetshop', async ({ page }) => {
-  await page.goto("https://sweetshop.netlify.app/");
-  const allProducts = page.locator("[class='card']");
-  const productCount = await allProducts.count();
-  let productList = [];
-  let productAddtoCart = 0;
-
-  for(let i=0; i<productCount; i++){
-    const productName = await allProducts.nth(i).locator("[class='card-title']").textContent();
-    if(productName.trim() === "Chocolate Cups"){
-      await allProducts.nth(i).locator("[class='btn btn-success btn-block addItem']").click();
-      productList.push(productName);
-      productAddtoCart ++; 
-    } 
-  }
-  console.log(productList);
-
-
-  const numberOfCart = Number(await page.locator("[class='badge badge-success']").textContent());
-  console.log(numberOfCart);
-  console.log(productAddtoCart);
-  expect(productAddtoCart).toEqual(numberOfCart);
+// Additional step : Delete all products from cart for fresh new test
+const deleteButton = page.locator("[class='cart_quantity_delete']");
+const counter = await deleteButton.count();
+for(let i=0; i<counter; i++){
+  await deleteButton.nth(i).click();
+}
 
 });
 
+test('Test Case 23: Verify address details in checkout page', async ({ page }) => {
+// 1. Launch browser
+// 2. Navigate to url 'http://automationexercise.com'
+const homepage = new HomePage(page);
+const register = new RegisterPage(page);
 
-test('attribute', async ({ page }) => {
-  await page.goto("https://www.saucedemo.com/v1/inventory.html");
-  const images = await page.$$('img.inventory_item_img');
-  let count = images.length;
-  const targetSrcValue = "./img/bolt-shirt-1200x1500.jpg";
+await homepage.navigateTo(testData.environment.sourceURL);
+// 3. Verify that home page is visible successfully
+await expect(page.getByRole('heading', { name: 'Full-Fledged practice website for Automation Engineers' })).toBeVisible();
 
-  // Iterate through the images and get the src attribute values
-  for (let i=0; i<count; i++){
-    // const srcValue = await img.getAttribute('src');
-    const srcValue = await images[i].getAttribute('src');
-    if (srcValue.includes(targetSrcValue)) {
-      console.log('Matching src attribute value found:', srcValue);
-      await page.locator("[class='btn_primary btn_inventory']").nth(i).click();
-      }
-  
-    }
+// 4. Click 'Signup / Login' button
+await page.locator("[href='/login']").click();
+
+// 5. Fill all details in Signup and create account
+const username = homepage.generateUsername();
+const email = username+"@test.com";
+const cardName = username;
+
+
+await homepage.proceedRegisternewUser(username, email);
+await register.registernewUser(testData.registrationData);
+
+// 6. Verify 'ACCOUNT CREATED!' and click 'Continue' button
+const registerCompletedMessage = await register.completedRegister();
+console.log(registerCompletedMessage); //print account created message
+await register.completedContinue();
+
+// 7. Verify ' Logged in as username' at top
+const loggedUser = await page.locator("li:has-text('Logged in as')").textContent();
+const expectedloggedUser = `Logged in as ${username}`;
+expect(loggedUser.trim()).toEqual(expectedloggedUser);
+
+// 8. Add products to cart
+// 9. Click 'Cart' button
+const addProduct = await homepage.addRandomProductToCart(testData.productData.randomProductData);
+console.log(addProduct); //print product added to cart
+
+
+// 10. Verify that cart page is displayed
+const cartVisible =  page.locator("[class='active']");
+expect(await cartVisible).toBeVisible();
+expect(await cartVisible.textContent()).toEqual("Shopping Cart");
+
+// 11. Click Proceed To Checkout
+await page.locator("[class='btn btn-default check_out']").click();
+
+// 12. Verify that the delivery address is same address filled at the time registration of account
+const deliveryAddress = page.locator("[id='address_delivery']");
+const deliveryElements = deliveryAddress.locator("li");
+const count = 8;
+let retrievedDeliveryAddress = [];
+for(let i=0; i<count; i++){
+  const addressDetail = await deliveryElements.nth(i).textContent();
+  retrievedDeliveryAddress.push(addressDetail.trim());
+}
+//cleaning the data
+retrievedDeliveryAddress = cleanAddressData(retrievedDeliveryAddress, 'Your delivery address', 'Mr.');
+retrievedDeliveryAddress = cleanSpecificEntry(retrievedDeliveryAddress);
+
+// console.log(retrievedDeliveryAddress);
+// console.log(expectedDeliveryAddress);
+expect(testData.registrationData.expectedAddress).toEqual(retrievedDeliveryAddress);
+
+
+// 13. Verify that the billing address is same address filled at the time registration of account
+const billingAddress = page.locator("[id='address_invoice']");
+const billingAddressElements = billingAddress.locator("li");
+const counter = 8;
+let retrievedBillingAddress = [];
+for(let i=0; i<counter; i++){
+  const addressDetail = await billingAddressElements.nth(i).textContent();
+  retrievedBillingAddress.push(addressDetail.trim());
+}
+//cleaning the data
+retrievedBillingAddress = cleanAddressData(retrievedBillingAddress, 'Your billing address', 'Mr.');
+retrievedBillingAddress = cleanSpecificEntry(retrievedBillingAddress);
+
+
+// console.log(retrievedBillingAddress);
+// console.log(expectedBillingAddress);
+expect(testData.registrationData.expectedAddress).toEqual(retrievedBillingAddress);
+
+// 14. Click 'Delete Account' button
+await page.locator("[href='/delete_account']").click();
+
+// 15. Verify 'ACCOUNT DELETED!' and click 'Continue' button
+const accountDeleted = page.getByRole('heading', { name: 'Account Deleted!' });
+await expect(accountDeleted).toBeVisible();
+const deletedMessage = await accountDeleted.textContent();
+expect(deletedMessage).toEqual("Account Deleted!");
+console.log(deletedMessage);
+await page.locator("[data-qa='continue-button']").click();
 });
-
-
-
-
-test('order', async ({ page }) => {
-  await page.goto("https://rahulshettyacademy.com/client/");
-  await page.locator('[type="email"]').fill("test1234321@gmail.com");
-  await page.locator('[type="password"]').fill("Password32!");
-  await page.locator('[type="submit"]').click();
-  const allProducts = page.locator("[class='card']");
-  const product = "ADIDAS ORIGINAL";
-  const productCount = await allProducts.count();
-  // console.log(productCount);
-  // const productCount = 4;
-  for(let i=0; i<productCount; i++){
-    const productToAdd = await allProducts.nth(i).locator("div h5 b").textContent();
-    if(productToAdd === product){
-      await page.locator("[class='btn w-10 rounded']").nth(i).click();
-    }
-    }
-
-  await page.locator("[routerlink='/dashboard/cart']").click();
-  await page.locator("[class='btn btn-primary']").nth(2).click();
-  await page.locator("[placeholder='Select Country']").pressSequentially("Ind");
-  const dropdown =  page.locator(".ta-results");
-  await dropdown.waitFor();
-  const countries =  dropdown.locator("button");
-  const countryCount = await countries.count();
-  for(let i=0; i<countryCount; i++){
-    const country = await countries.nth(i).textContent();
-    if(country.trim() === "India"){
-      countries.nth(i).click();
-    }
-  }
-
-
-  // expect(page.locator("[class='ta-item list-group-item ng-star-inserted']")).toBeVisible();
-  // await page.locator("[class='ng-star-inserted']").nth(1).click();
-  await page.locator("[class='btnn action__submit ng-star-inserted']").click();
-  const orderNumber = await page.locator("[class='ng-star-inserted']").nth(2).textContent();
-  let cleanOrderNumber = orderNumber.replace(/\|/g, "").trim();
-  console.log(cleanOrderNumber);
-  await page.locator("[routerlink='/dashboard/myorders']").nth(1).click();
-
-  const allOrder =  page.locator("tbody tr");
-  const allOrderCount = await allOrder.count();
-  let productInfo;
-  console.log(allOrderCount);
-  for(let i=0; i<6; i++){
-    const order = await allOrder.nth(i).locator("th").textContent();
-    console.log(order);
-    if(order.includes(cleanOrderNumber)){
-      console.log("Order Found");
-      productInfo = await allOrder.nth(i).locator("td").allTextContents();
-      // productInfo.push(order);
-    }
-  break;
-  }
-
-  console.log(`Product Name: ${productInfo[1]}, priced at ${productInfo[2]}, order at ${productInfo[3]}`);
-});
-
-//test not working due to bot detection
-// test('expedia', async ({ page }) => {
-//   await page.goto("https://www.expedia.com/");
-//   await page.locator("[data-stid='destination_form_field-menu-trigger']").click();
-//   await page.locator("[data-stid='destination_form_field-menu-input']").pressSequentially("Seoul");
-//   const allResults = page.locator("[data-stid='destination_form_field-results']");
-//   await allResults.waitFor();
-//   const results = await page.$$("button.destination_form_field-result-item-button");
-//   const matchingResult = results.getAttribute("aria-label");
-//   let count = await results.length();
-//   for (let i=0; i<count; i++){
-//     // const srcValue = await img.getAttribute('src');
-//     const matchingResult = results[i].getAttribute("aria-label");
-//     if (matchingResult.includes("Seoul (ICN - Incheon Intl.) South Korea")) {
-//       console.log('Matching src attribute value found:', matchingResult);
-//       await results[i].click();
-//       }
-  
-//     }
-
-
-// });
-
-
-test('automationexercise - add to cart', async ({ page }) => {
-  await page.goto("https://automationexercise.com/");
-  await page.locator("[href='/login']").click();
-  await page.locator("[data-qa='login-email']").fill("test33@test.com");
-  await page.locator("[data-qa='login-password']").fill("test33");
-  await page.locator("[data-qa='login-button']").click();
-  const productNames = ["Sleeveless Dress", "Winter Top", "Frozen Tops For Kids"];
-
-  const allProducts = page.locator("[class='single-products']");
-  const countProducts = await allProducts.count();
-  // const allProductNames = page.locator("[class='productinfo text-center']");
-  let productAddToCart = [];
-  for(const produk of productNames){
-    for(let i=0; i<countProducts; i++){
-      let productName = await allProducts.nth(i).locator("div p").allTextContents();
-      if (productName.length >= 2 && productName[0] === productName[1]) {
-        productName.splice(1, 1); 
-        productName = productName[0]
-    }
-      // console.log(productName);
-      if(productName === produk){
-        productAddToCart.push(productName);
-        await allProducts.nth(i).locator("div a").nth(0).click();
-      }
-    }
-  }
-    
-  // const productNames = allProductNames.allTextContents();
-  console.log(productAddToCart);
-  await page.locator("[href='/view_cart']").nth(0).click();
-
-});
-
-
-
-test('automationexercise-search products', async ({ page }) => {
-  await page.goto("https://automationexercise.com/");
-  await page.locator("[href='/login']").click();
-  await page.locator("[data-qa='login-email']").fill("test33@test.com");
-  await page.locator("[data-qa='login-password']").fill("test33");
-  await page.locator("[data-qa='login-button']").click();
-  await page.locator("[href='/products']").click();
-  const productNames = ["Sleeveless Dress", "Sleeveless Unicorn Patch Gown - Pink", "Sleeveless Unicorn Print Fit & Flare Net Dress - Multi"];
-  await page.locator("[id='search_product']").fill("Sleeveless");
-  await page.locator("[id='submit_search']").click();
-
-
-  const allProducts = page.locator("[class='single-products']");
-  const countProducts = await allProducts.count();
-  // const allProductNames = page.locator("[class='productinfo text-center']");
-  let productAddToCart = [];
-  for(let i=0; i<countProducts; i++){
-    let productName = await allProducts.nth(i).locator("div p").nth(0).textContent();
-    productAddToCart.push(productName);
-    }
-
-
-// productAddToCart.push(productName);
-    
-  // const productNames = allProductNames.allTextContents();
-  console.log(productAddToCart);
-  console.log(productNames);
-  expect(productAddToCart).toEqual(productNames);
- 
-
-  let arraysEqual = true;
-  if (productNames.length !== productAddToCart.length) {
-      arraysEqual = false;
-  } else {
-      for (let i = 0; i < productNames.length; i++) {
-          if (productNames[i].trim() !== productAddToCart[i].trim()) {
-              arraysEqual = false;
-              break;
-          }
-      }
-    }
-
-
-  console.log(arraysEqual);
-  if(arraysEqual = true){
-    console.log("Product search match");
-  }
-  else{
-    console.log("Product search not match");
-  }
-
-
-});
-
-
-test('rahulshetty academy', async ({ page }) => {
-  await page.goto("https://rahulshettyacademy.com/angularpractice/shop");
-  const allProducts = page.locator("[class='card h-100']");
-  const productCount = await allProducts.count();
-  for(let i=0; i<productCount; i++){
-    const productName =  await allProducts.nth(i).locator("div h4").textContent();
-    if(productName.trim() === "Nokia Edge"){
-      await allProducts.nth(i).locator("div button").click();
-      console.log("Added to cart");
-
-
-    }
-  }
-  await page.locator("[class='nav-link btn btn-primary']").click();
-  await page.locator("[class='btn btn-success']").click();
-  await page.locator("[id='country']").pressSequentially("Ind");
-  const allCountries = page.locator("[class='suggestions']");
-  const allCountriesName = allCountries.locator("ul");
-  await allCountries.waitFor();
-  const count = await allCountriesName.count();
-  console.log(count);
-  for(let i=0; i<count; i++){
-    const country =  allCountriesName.nth(i).locator("li a");
-    const countryName = await country.textContent();
-    if(countryName.trim() === "Indonesia"){
-      await country.click();
-      console.log("Country selected");
-      break;
-
-    }
-    
-  }
-
-  await page.locator("[for='checkbox2']").click();
-  await page.locator("[type='submit']").click()
-  const success = await page.locator("[class='alert alert-success alert-dismissible']").textContent();
-  const expectedSucess = "Thank you! Your order will be delivered in next few weeks :-).";
-  console.log(success);
-  expect(success.includes(expectedSucess));
-
-});
-
-
-
-// test('reversed string', async ({ page }) => {
-
-// const string = "hello";
-// let reversed = "";
-// for (let i = string.length; i>=0; i --){
-//   reversed += string[i]
-// }
-
-// console.log(reversed);
-
-
-// const numbers = [1, 2, 300, 4, 5];
-// let max = 0;
-
-// for(const num of numbers){
-//   if(num > max){
-//     max = num;
-//   }
-// }
-
-// console.log(max);
-// });
-
-
-
-
-
-// test('shoppee', async ({ page }) => {
-//   await page.goto("https://shopee.com.my/search?keyword=powerbank");
-//   const allProducts = page.locator("[class='shopee_ic']");
-//   await allProducts.waitFor();
-//   const count = await allProducts.count();
-//   const product = "abc";
-//   let addtoCart = "";
-//   for(let i=0; i<count; i++){
-//     const procuctName = await allProducts.nth(i).locator("div a div div dic").textContent();
-//     if(procuctName === product){
-//       await allProducts.nth(i).locator("button").click()
-//       addtoCart = procuctName;
-//     }
-//   console.log(procuctName);
-//   }
-
-  // let destinationList = [];
-
-  // for(let i=0; i<destinationCount; i++){
-  //   const productName = await allProducts.nth(i).locator("[class='card-title']").textContent();
-  //   if(productName.trim() === "Chocolate Cups"){
-  //     await allProducts.nth(i).locator("[class='btn btn-success btn-block addItem']").click();
-  //     productList.push(productName);
-  //   } 
-  // }
-  // console.log(productList);
-
-
-  // const numberOfCart = Number(await page.locator("[class='badge badge-success']").textContent());
-  // console.log(numberOfCart);
-  // console.log(productAddtoCart);
-  // expect(productAddtoCart).toEqual(numberOfCart);
-
-// });
-
-
-// test.only('test', async ({ page }) => {
-//   await page.goto("https://www.saucedemo.com/v1/inventory.html");
-//   const images = await page.$$('div.inventory_item_name');
-//   console.log(`Found ${images.length} images`);
-
-//   for (let i = 0; i < images.length; i++) {
-//     const altText = await images[i].getAttribute('class');
-//     console.log(`Alt attribute of element ${i}: ${altText}`);
-//   }
-
-// });
-
-
-
-// test.only('expedia', async ({ page }) => {
-//   await page.goto("https://www.expedia.com/");
-//   await page.locator("[data-stid='destination_form_field-menu-trigger']").click();
-//   await page.locator("[data-stid='destination_form_field-menu-input']").pressSequentially("Seoul", { delay: 300 });
-//   const allResults = page.locator('[data-stid="destination_form_field-result-item-button"]');
-//   await allResults.waitFor();
-//   const destinations = await page.$$("button.uitk-action-list-item-link");
-//   const count = destinations.length;
-
-//   for(let i=0; i<count; i++){
-//     const destination = destinations[i].getAttribute("aria-label");
-//     console.log(destination);
-//   }
-
-
-
-
-// });
-
-// test.only('booking.com', async ({ page }) => {
-//   await page.goto('https://www.booking.com/');
-//   await page.waitForTimeout(2000);
-//   page.locator('[class="c624d7469d a0e60936ad dab7c5c6fa a3214e5942"]');
-//   await page.locator('[d="m13.31 12 6.89-6.89a.93.93 0 1 0-1.31-1.31L12 10.69 5.11 3.8A.93.93 0 0 0 3.8 5.11L10.69 12 3.8 18.89a.93.93 0 0 0 1.31 1.31L12 13.31l6.89 6.89a.93.93 0 1 0 1.31-1.31z"]').click();
-  
-//   await page.locator('[name="ss"]').click();
-//   await page.locator('[name="ss"]').pressSequentially("Seoul", {delay: 100});
-//   await page.waitForTimeout(3000);
-//   const allResults =  page.locator('[data-testid="autocomplete-result"]');
-
-//   await allResults.waitForSelector
-//   const count = await allResults.count();
-
-//   for(let i=0; i<count; i++){
-//     const result =  allResults.nth(i).locator('div div');
-//     const resultName = await result.allTextContents();
-//     for(const destination of resultName){
-//       if(destination === "Myeong-dong"){
-//         console.log(`${destination}, selected`);
-//         await page.locator('[role="button"]').nth(i).click()
-
-//         break;
-//       }
-//     }
-//   }
-// });
-
-test.only('verify text', async ({ page }) => {
-  await page.goto('https://www.saucedemo.com/');
-  await page.getByPlaceholder('Username').fill('locked_out_user');
-  await page.getByPlaceholder('Password').fill('secret_sauce');
-  await page.locator('[data-test="login-button"]').click();
-
-
-  function (VisinbleText)
-  const text = page.getByRole('heading', {name: 'Epic sadface: Sorry, this user has been locked out.'})
-  const rawText = await text.innerText();
-  const textVisible = await text.isVisible();
-
-  if(!textVisible){
-    console.log("Text is not found")
-  }
-  else{
-    console.log('Text found');
-    console.log(rawText.trim());
-    await expect(text).toBeVisible();
-  }
-
-
-
-});
-
-// test('keyboard', async ({ page }) => {
-//   await page.goto(this.website);
-//   await page.keyboard.press("s");
-//   await page.pause();
-
-
-// });
-
-// test('keyboard', async ({ page }) => {
-//   await page.goto(this.website);
-//   await page.keyboard.press("s");
-//   await page.pause();
-
-
-// });

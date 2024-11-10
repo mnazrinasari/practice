@@ -31,6 +31,11 @@ module.exports = defineConfig({
     trace: 'on-first-retry',
   },
 
+  launchOptions: {
+    // Add the argument to start maximized
+    args: ['--start-maximized'],
+  },
+
   /* Configure projects for major browsers */
   projects: [
     {
