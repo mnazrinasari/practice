@@ -1,5 +1,9 @@
 const { test, expect } = require('@playwright/test');
 const { stat } = require('fs');
+const { HomePage } = require('../pages/homePage');
+const { RegisterPage } = require('../pages/registerPage');
+const { ProductPage } = require('../pages/productPage');
+
 
 function generateUsername() {
   const date = new Date();
@@ -38,8 +42,9 @@ const randomProductData = ["Sleeveless Dress",
    "Winter Top", 
    "Frozen Tops For Kids"];
 //registration data
-const username = generateUsername();
-const email = username+"@test.com";
+// const username = generateUsername();
+// const email = username+"@test.com";
+const sourceURL = "http://automationexercise.com";
 const password = "test1234";
 const birthdayDayOption = "1"; 
 const birthdayMonthOption = "1";
@@ -63,7 +68,6 @@ const expectedAddress = [
   mobileNumber
 ];
 //card data
-const cardName = username;
 const cardNumber = "4444444444444444";
 const cardCVC = "123";
 const cardExpiryMonth = "12";
@@ -74,8 +78,10 @@ test('Test Case 15: Place Order: Register before Checkout', async ({ page }) => 
 
 // 1. Launch browser
 // 2. Navigate to url 'http://automationexercise.com'
-await page.goto("https://automationexercise.com/");
+const homepage = new HomePage(page);
+const register = new RegisterPage(page);
 
+await homepage.navigateTo(sourceURL);
 // 3. Verify that home page is visible successfully
 await expect(page.getByRole('heading', { name: 'Full-Fledged practice website for Automation Engineers' })).toBeVisible();
 
@@ -83,29 +89,19 @@ await expect(page.getByRole('heading', { name: 'Full-Fledged practice website fo
 await page.locator("[href='/login']").click();
 
 // 5. Fill all details in Signup and create account
-await page.locator("[data-qa='signup-name']").fill(username);
-await page.locator("[data-qa='signup-email']").fill(email);
-await page.locator("[data-qa='signup-button']").click();
-await page.locator("[for='id_gender1']").click();
-await page.locator("[type='password']").fill(password);
-await page.locator("[data-qa='days']").selectOption({ value: birthdayDayOption });
-await page.locator("[data-qa='months']").selectOption({ value: birthdayMonthOption });
-await page.locator("[data-qa='years']").selectOption({ value: birthdayYearOption });
-await page.locator("[data-qa='first_name']").fill(firstName);
-await page.locator("[data-qa='last_name']").fill(lastName);
-await page.locator("[data-qa='company']").fill(company);
-await page.locator("[data-qa='address']").fill(address);
-await page.locator("[data-qa='address2']").fill(address2);
-await page.locator("[data-qa='country']").selectOption({ value: country });
-await page.locator("[data-qa='state']").fill(state);
-await page.locator("[data-qa='city']").fill(city);
-await page.locator("[data-qa='zipcode']").fill(zipcode);
-await page.locator("[data-qa='mobile_number']").fill(mobileNumber);
-await page.locator("[data-qa='create-account']").click();
+const username = homepage.generateUsername();
+const email = username+"@test.com";
+const cardName = username;
+
+await homepage.registernewUser(username, email);
+await register.registernewUser(password, birthdayDayOption, birthdayMonthOption, 
+  birthdayYearOption, firstName, lastName, company, address, address2, 
+  country, state, city, zipcode, mobileNumber);
 
 // 6. Verify 'ACCOUNT CREATED!' and click 'Continue' button
-await expect(page.getByRole('heading', { name: 'Account Created!' })).toBeVisible();
-await page.locator("[data-qa='continue-button']").click();
+const registerCompletedMessage = await register.completedRegister();
+console.log(registerCompletedMessage); //print account created message
+await register.completedContinue();
 
 // 7. Verify ' Logged in as username' at top
 const loggedUser = await page.locator("li:has-text('Logged in as')").textContent();
@@ -113,47 +109,14 @@ const expectedloggedUser = `Logged in as ${username}`;
 expect(loggedUser.trim()).toEqual(expectedloggedUser);
 
 // 8. Add products to cart
-const productNames = randomProductData;
-
-const allProducts = page.locator("[class='single-products']");
-const countProducts = await allProducts.count();
-let productAddToCart = [];
-
-for (let i = 0; i < countProducts; i++) {
-  const productNameElements = await allProducts.nth(i).locator("div p").nth(1).allTextContents();
-  
-  for (const name of productNameElements) {
-    for (const productName of productNames) {
-      if (name.trim() === productName) {
-        productAddToCart.push(name.trim());
-        await allProducts.nth(i).locator("div a").nth(0).click();
-        
-        if (productAddToCart.length < productNames.length) {
-          const modal = page.locator("[class='btn btn-success close-modal btn-block']");
-          await modal.waitFor({ state: 'attached' });
-          await modal.waitFor({ state: 'visible' });
-          await modal.click();
-          console.log("clicked");
-
 // 9. Click 'Cart' button
-        } else {
-          const modal = page.locator("p a");
-          await modal.waitFor({ state: 'attached' });
-          await modal.waitFor({ state: 'visible' });
-          await modal.click();
-          console.log("last product clicked");
-        }
-        break;
-      }
-    }
-  }
-}
+const addProduct = await homepage.addRandomProductToCart(randomProductData);
+console.log(addProduct); //print product added to cart
 
-console.log(productAddToCart);
 
 // 10. Verify that cart page is displayed
 const cartVisible =  page.locator("[class='active']");
-expect(await cartVisible).toBeVisible();
+expect(cartVisible).toBeVisible();
 expect(await cartVisible.textContent()).toEqual("Shopping Cart");
 
 // 11. Click Proceed To Checkout
@@ -190,24 +153,23 @@ console.log(text);
 // expect(await message.textContent()).toEqual("Your order has been placed successfully!");
 
 // 17. Click 'Delete Account' button
-await page.locator("[href='/delete_account']").click();
-
 // 18. Verify 'ACCOUNT DELETED!' and click 'Continue' button
-const accountDeleted = page.getByRole('heading', { name: 'Account Deleted!' });
-await expect(accountDeleted).toBeVisible();
-const deletedMessage = await accountDeleted.textContent();
-expect(deletedMessage).toEqual("Account Deleted!");
-console.log(deletedMessage);
-await page.locator("[data-qa='continue-button']").click();
+const deleteAccount = await homepage.deleteAccount();
+console.log(deleteAccount);
 });
 
-test('Test Case 20: Search Products and Verify Cart After Login', async ({ page }) => {
+
+test.only('Test Case 20: Search Products and Verify Cart After Login', async ({ page }) => {
 
 // 1. Launch browser
 // 2. Navigate to url 'http://automationexercise.com'
-  await page.goto("https://automationexercise.com/");
+const homepage = new HomePage(page);
+const register = new RegisterPage(page);
+const product = new ProductPage(page);
+
+await homepage.navigateTo(sourceURL);
 // 3. Click on 'Products' button
-  await page.locator("[href='/products']").click();
+await page.locator("[href='/products']").click();
 // 4. Verify user is navigated to ALL PRODUCTS page successfully
 const allProductDisplayed = page.getByRole('heading', { name: 'All Products' });
 await expect(allProductDisplayed).toBeVisible();
@@ -216,7 +178,6 @@ expect(allProductMessage ).toEqual("All Products");
 console.log(allProductMessage );
 
 // 5. Enter product name in search input and click search button
-const productNames = searchProductData;
 await page.locator("[id='search_product']").fill("Sleeveless");
 await page.locator("[id='submit_search']").click();
 
@@ -228,40 +189,14 @@ expect(searchedProductMessage ).toEqual("Searched Products");
 console.log(searchedProductMessage );
 
 // 7. Verify all the products related to search are visible
-const allProducts = page.locator("[class='single-products']");
-const countProducts = await allProducts.count();
-let productAddToCart = [];
-let productInResult = []
-
 // 8. Add those products to cart
-for (let i = 0; i < countProducts; i++) {
-    const productNameElements = await allProducts.nth(i).locator("div p").nth(1).allTextContents();
-    
-    for (const name of productNameElements) {
-      productInResult.push(name.trim());
-        if (name.trim().includes("Sleeveless")) {
-            productAddToCart.push(name.trim());
-            await allProducts.nth(i).locator("div a").nth(0).click();
-            if (productAddToCart.length < productNames.length) {
-              const modal = page.locator("[class='btn btn-success close-modal btn-block']");
-              await modal.waitFor({ state: 'attached' });
-              await modal.waitFor({ state: 'visible' });
-              await modal.click();
-              console.log("clicked");
-            } else {
 // 9. Click 'Cart' button and verify that products are visible in cart
-              const modal = page.locator("p a");
-              await modal.waitFor({ state: 'attached' });
-              await modal.waitFor({ state: 'visible' });
-              await modal.click();
-              console.log("last product clicked");
-            }
-            break;
-          }
-        }
-      }
-expect(productInResult).toEqual(productNames); 
-expect(productAddToCart).toEqual(productNames); 
+const { productAddToCart, productInResult } = await product.addSearchedProducttoCart(searchProductData);
+console.log(productInResult);
+console.log(productAddToCart);
+
+expect(productInResult).toEqual(searchProductData);
+expect(productAddToCart).toEqual(searchProductData);
 
 // 10. Click 'Signup / Login' button and submit login details
 const signupLoginLink = page.getByRole('link', { name: 'Signup / Login' });
@@ -297,8 +232,10 @@ for(let i=0; i<counter; i++){
 test('Test Case 23: Verify address details in checkout page', async ({ page }) => {
 // 1. Launch browser
 // 2. Navigate to url 'http://automationexercise.com'
-await page.goto("https://automationexercise.com/");
+const homepage = new HomePage(page);
+const register = new RegisterPage(page);
 
+await homepage.navigateTo(sourceURL);
 // 3. Verify that home page is visible successfully
 await expect(page.getByRole('heading', { name: 'Full-Fledged practice website for Automation Engineers' })).toBeVisible();
 
@@ -306,29 +243,19 @@ await expect(page.getByRole('heading', { name: 'Full-Fledged practice website fo
 await page.locator("[href='/login']").click();
 
 // 5. Fill all details in Signup and create account
-await page.locator("[data-qa='signup-name']").fill(username);
-await page.locator("[data-qa='signup-email']").fill(email);
-await page.locator("[data-qa='signup-button']").click();
-await page.locator("[for='id_gender1']").click();
-await page.locator("[type='password']").fill(password);
-await page.locator("[data-qa='days']").selectOption({ value: birthdayDayOption });
-await page.locator("[data-qa='months']").selectOption({ value: birthdayMonthOption });
-await page.locator("[data-qa='years']").selectOption({ value: birthdayYearOption });
-await page.locator("[data-qa='first_name']").fill(firstName);
-await page.locator("[data-qa='last_name']").fill(lastName);
-await page.locator("[data-qa='company']").fill(company);
-await page.locator("[data-qa='address']").fill(address);
-await page.locator("[data-qa='address2']").fill(address2);
-await page.locator("[data-qa='country']").selectOption({ value: country });
-await page.locator("[data-qa='state']").fill(state);
-await page.locator("[data-qa='city']").fill(city);
-await page.locator("[data-qa='zipcode']").fill(zipcode);
-await page.locator("[data-qa='mobile_number']").fill(mobileNumber);
-await page.locator("[data-qa='create-account']").click();
+const username = homepage.generateUsername();
+const email = username+"@test.com";
+const cardName = username;
+
+await homepage.registernewUser(username, email);
+await register.registernewUser(password, birthdayDayOption, birthdayMonthOption, 
+  birthdayYearOption, firstName, lastName, company, address, address2, 
+  country, state, city, zipcode, mobileNumber);
 
 // 6. Verify 'ACCOUNT CREATED!' and click 'Continue' button
-await expect(page.getByRole('heading', { name: 'Account Created!' })).toBeVisible();
-await page.locator("[data-qa='continue-button']").click();
+const registerCompletedMessage = await register.completedRegister();
+console.log(registerCompletedMessage); //print account created message
+await register.completedContinue();
 
 // 7. Verify ' Logged in as username' at top
 const loggedUser = await page.locator("li:has-text('Logged in as')").textContent();
@@ -336,43 +263,10 @@ const expectedloggedUser = `Logged in as ${username}`;
 expect(loggedUser.trim()).toEqual(expectedloggedUser);
 
 // 8. Add products to cart
-const productNames = randomProductData;
-
-const allProducts = page.locator("[class='single-products']");
-const countProducts = await allProducts.count();
-let productAddToCart = [];
-
-for (let i = 0; i < countProducts; i++) {
-  const productNameElements = await allProducts.nth(i).locator("div p").nth(1).allTextContents();
-  
-  for (const name of productNameElements) {
-    for (const productName of productNames) {
-      if (name.trim() === productName) {
-        productAddToCart.push(name.trim());
-        await allProducts.nth(i).locator("div a").nth(0).click();
-        
-        if (productAddToCart.length < productNames.length) {
-          const modal = page.locator("[class='btn btn-success close-modal btn-block']");
-          await modal.waitFor({ state: 'attached' });
-          await modal.waitFor({ state: 'visible' });
-          await modal.click();
-          console.log("clicked");
-
 // 9. Click 'Cart' button
-        } else {
-          const modal = page.locator("p a");
-          await modal.waitFor({ state: 'attached' });
-          await modal.waitFor({ state: 'visible' });
-          await modal.click();
-          console.log("last product clicked");
-        }
-        break;
-      }
-    }
-  }
-}
+const addProduct = await homepage.addRandomProductToCart(randomProductData);
+console.log(addProduct); //print product added to cart
 
-console.log(productAddToCart);
 
 // 10. Verify that cart page is displayed
 const cartVisible =  page.locator("[class='active']");
