@@ -8,7 +8,6 @@ function generateUsername() {
   return `user_${timestamp}_${randomNum}`;
 }
 
-
 function cleanAddressEntry(entry) {
   return entry.replace(/\s+/g, ' ').trim().replace(/, 0000$/, '');
 }
