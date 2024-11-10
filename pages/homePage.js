@@ -1,4 +1,6 @@
 const {test, expect} = require('@playwright/test');
+const locators = require('../locators');
+
 
 class HomePage {
     constructor(page)
@@ -10,7 +12,7 @@ class HomePage {
     this.signupButton = page.locator("[data-qa='signup-button']");
     this.allProducts = page.locator("[class='single-products']");
     this.continueModal = page.locator("[class='btn btn-success close-modal btn-block']");
-    this.viewCartModal = page.locator("p a");
+    this.viewCartModal = page.locator(locators.viewCartModal).nth(1);
     this.deleteAccountButton = page.locator("[href='/delete_account']");
     this.deleteAccountMessage = page.getByRole('heading', { name: 'Account Deleted!' });
     this.deleteConfirmButton = page.locator("[data-qa='continue-button']");
