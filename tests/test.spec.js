@@ -333,7 +333,7 @@ const expectedloggedUser = `Logged in as ${username}`;
 expect(loggedUser.trim()).toEqual(expectedloggedUser);
 
 // 8. Add products to cart
-const productNames = ["Sleeveless Dress", "Winter Top", "Frozen Tops For Kids"];
+const productNames = randomProductData;
 
 const allProducts = page.locator("[class='single-products']");
 const countProducts = await allProducts.count();
