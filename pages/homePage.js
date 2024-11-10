@@ -34,7 +34,7 @@ async navigateTo(sourceURL)
     await this.page.goto("https://automationexercise.com/");;
 }
 
-async registernewUser(username, email)
+async proceedRegisternewUser(username, email)
 {
     await this.signupName.fill(username);
     await this.signupEmail.fill(email);

@@ -34,27 +34,26 @@ class RegisterPage {
 
 
 
-async registernewUser(password, birthdayDayOption, birthdayMonthOption, 
-    birthdayYearOption, firstName, lastName, company, address, address2, 
-    country, state, city, zipcode, mobileNumber)
+async registernewUser(data)
 {
     await this.gender.click();
-    await this.password.fill(password);
-    await this.birthDay.selectOption({ value: birthdayDayOption });
-    await this.birthMonth.selectOption({ value: birthdayMonthOption });
-    await this.birthYear.selectOption({ value: birthdayYearOption });
-    await this.firstName.fill(firstName);
-    await this.lastName.fill(lastName);
-    await this.company.fill(company);
-    await this.address.fill(address);
-    await this.address2.fill(address2);
-    await this.country.selectOption({ value: country });
-    await this.state.fill(state);
-    await this.city.fill(city);
-    await this.zipcode.fill(zipcode);
-    await this.mobileNumber.fill(mobileNumber);
+    await this.password.fill(data.password);
+    await this.birthDay.selectOption({ value: data.birthdayDayOption });
+    await this.birthMonth.selectOption({ value: data.birthdayMonthOption });
+    await this.birthYear.selectOption({ value: data.birthdayYearOption });
+    await this.firstName.fill(data.firstName);
+    await this.lastName.fill(data.lastName);
+    await this.company.fill(data.company);
+    await this.address.fill(data.address);
+    await this.address2.fill(data.address2);
+    await this.country.selectOption({ value: data.country });
+    await this.state.fill(data.state);
+    await this.city.fill(data.city);
+    await this.zipcode.fill(data.zipcode);
+    await this.mobileNumber.fill(data.mobileNumber);
     await this.createAccountButton.click();
 }
+
 
 
 async completedRegister()

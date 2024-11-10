@@ -1,5 +1,6 @@
 const { test, expect } = require('@playwright/test');
 const { stat } = require('fs');
+const testData = require('../testData');
 const { HomePage } = require('../pages/homePage');
 const { RegisterPage } = require('../pages/registerPage');
 const { ProductPage } = require('../pages/productPage');
@@ -31,42 +32,6 @@ function cleanAddressData(addressArray, unwantedEntry, unwantedPrefix) {
   );
 }
 
-//login data
-const existingUsername = "test33@test.com";
-const existingPassword = "test33";
-//product data
-const searchProductData = ["Sleeveless Dress", 
-  "Sleeveless Unicorn Patch Gown - Pink", 
-  "Sleeveless Unicorn Print Fit & Flare Net Dress - Multi"];
-const randomProductData = ["Sleeveless Dress", 
-   "Winter Top", 
-   "Frozen Tops For Kids"];
-//registration data
-// const username = generateUsername();
-// const email = username+"@test.com";
-const sourceURL = "http://automationexercise.com";
-const password = "test1234";
-const birthdayDayOption = "1"; 
-const birthdayMonthOption = "1";
-const birthdayYearOption = "2000";
-const firstName = "first_name";
-const lastName = "last_name";
-const company = "company";
-const address = "address";
-const address2 = "address2";
-const country = "Singapore";
-const state = "state";
-const city = "city";
-const zipcode = "0000";
-const mobileNumber = "9999";
-const expectedAddress = [
-  company,
-  address,
-  address2,
-  `${city} ${state} ${zipcode}`,
-  country,
-  mobileNumber
-];
 //card data
 const cardNumber = "4444444444444444";
 const cardCVC = "123";
@@ -81,7 +46,7 @@ test('Test Case 15: Place Order: Register before Checkout', async ({ page }) => 
 const homepage = new HomePage(page);
 const register = new RegisterPage(page);
 
-await homepage.navigateTo(sourceURL);
+await homepage.navigateTo(testData.environment.sourceURL);
 // 3. Verify that home page is visible successfully
 await expect(page.getByRole('heading', { name: 'Full-Fledged practice website for Automation Engineers' })).toBeVisible();
 
@@ -93,10 +58,8 @@ const username = homepage.generateUsername();
 const email = username+"@test.com";
 const cardName = username;
 
-await homepage.registernewUser(username, email);
-await register.registernewUser(password, birthdayDayOption, birthdayMonthOption, 
-  birthdayYearOption, firstName, lastName, company, address, address2, 
-  country, state, city, zipcode, mobileNumber);
+await homepage.proceedRegisternewUser(username, email);
+await register.registernewUser(testData.registrationData);
 
 // 6. Verify 'ACCOUNT CREATED!' and click 'Continue' button
 const registerCompletedMessage = await register.completedRegister();
@@ -110,7 +73,7 @@ expect(loggedUser.trim()).toEqual(expectedloggedUser);
 
 // 8. Add products to cart
 // 9. Click 'Cart' button
-const addProduct = await homepage.addRandomProductToCart(randomProductData);
+const addProduct = await homepage.addRandomProductToCart(testData.productData.randomProductData);
 console.log(addProduct); //print product added to cart
 
 
@@ -159,7 +122,7 @@ console.log(deleteAccount);
 });
 
 
-test.only('Test Case 20: Search Products and Verify Cart After Login', async ({ page }) => {
+test('Test Case 20: Search Products and Verify Cart After Login', async ({ page }) => {
 
 // 1. Launch browser
 // 2. Navigate to url 'http://automationexercise.com'
@@ -167,7 +130,7 @@ const homepage = new HomePage(page);
 const register = new RegisterPage(page);
 const product = new ProductPage(page);
 
-await homepage.navigateTo(sourceURL);
+await homepage.navigateTo(testData.environment.sourceURL);
 // 3. Click on 'Products' button
 await page.locator("[href='/products']").click();
 // 4. Verify user is navigated to ALL PRODUCTS page successfully
@@ -191,6 +154,7 @@ console.log(searchedProductMessage );
 // 7. Verify all the products related to search are visible
 // 8. Add those products to cart
 // 9. Click 'Cart' button and verify that products are visible in cart
+const searchProductData = testData.productData.searchProductData;
 const { productAddToCart, productInResult } = await product.addSearchedProducttoCart(searchProductData);
 console.log(productInResult);
 console.log(productAddToCart);
@@ -201,8 +165,8 @@ expect(productAddToCart).toEqual(searchProductData);
 // 10. Click 'Signup / Login' button and submit login details
 const signupLoginLink = page.getByRole('link', { name: 'Signup / Login' });
 await signupLoginLink.click();
-await page.locator("[data-qa='login-email']").fill(existingUsername);
-await page.locator("[data-qa='login-password']").fill(existingPassword);
+await page.locator("[data-qa='login-email']").fill(testData.loginData.existingUsername);
+await page.locator("[data-qa='login-password']").fill(testData.loginData.existingPassword);
 await page.locator("[data-qa='login-button']").click();
 
 // 11. Again, go to Cart page
@@ -235,7 +199,7 @@ test('Test Case 23: Verify address details in checkout page', async ({ page }) =
 const homepage = new HomePage(page);
 const register = new RegisterPage(page);
 
-await homepage.navigateTo(sourceURL);
+await homepage.navigateTo(testData.environment.sourceURL);
 // 3. Verify that home page is visible successfully
 await expect(page.getByRole('heading', { name: 'Full-Fledged practice website for Automation Engineers' })).toBeVisible();
 
@@ -247,10 +211,9 @@ const username = homepage.generateUsername();
 const email = username+"@test.com";
 const cardName = username;
 
-await homepage.registernewUser(username, email);
-await register.registernewUser(password, birthdayDayOption, birthdayMonthOption, 
-  birthdayYearOption, firstName, lastName, company, address, address2, 
-  country, state, city, zipcode, mobileNumber);
+
+await homepage.proceedRegisternewUser(username, email);
+await register.registernewUser(testData.registrationData);
 
 // 6. Verify 'ACCOUNT CREATED!' and click 'Continue' button
 const registerCompletedMessage = await register.completedRegister();
@@ -264,7 +227,7 @@ expect(loggedUser.trim()).toEqual(expectedloggedUser);
 
 // 8. Add products to cart
 // 9. Click 'Cart' button
-const addProduct = await homepage.addRandomProductToCart(randomProductData);
+const addProduct = await homepage.addRandomProductToCart(testData.productData.randomProductData);
 console.log(addProduct); //print product added to cart
 
 
@@ -291,7 +254,7 @@ retrievedDeliveryAddress = cleanSpecificEntry(retrievedDeliveryAddress);
 
 // console.log(retrievedDeliveryAddress);
 // console.log(expectedDeliveryAddress);
-expect(expectedAddress).toEqual(retrievedDeliveryAddress);
+expect(testData.registrationData.expectedAddress).toEqual(retrievedDeliveryAddress);
 
 
 // 13. Verify that the billing address is same address filled at the time registration of account
@@ -310,7 +273,7 @@ retrievedBillingAddress = cleanSpecificEntry(retrievedBillingAddress);
 
 // console.log(retrievedBillingAddress);
 // console.log(expectedBillingAddress);
-expect(expectedAddress).toEqual(retrievedBillingAddress);
+expect(testData.registrationData.expectedAddress).toEqual(retrievedBillingAddress);
 
 // 14. Click 'Delete Account' button
 await page.locator("[href='/delete_account']").click();
