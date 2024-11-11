@@ -4,6 +4,7 @@ const testData = {
         existingPassword: "test33"
     },
     productData: {
+        searchText: "Sleeveless",
         searchProductData: [
             "Sleeveless Dress", 
             "Sleeveless Unicorn Patch Gown - Pink", 
