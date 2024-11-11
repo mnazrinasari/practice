@@ -40,14 +40,10 @@ await homepage.navigateTo(testData.environment.sourceURL);
 await expect(page.getByRole('heading', { name: 'Full-Fledged practice website for Automation Engineers' })).toBeVisible();
 
 // 4. Click 'Signup / Login' button
-await page.locator("[href='/login']").click();
+await homepage.navigateToPage('login');
 
 // 5. Fill all details in Signup and create account
-const username = homepage.generateUsername();
-const email = username+"@test.com";
-const cardName = `${testData.registrationData.firstName} ${testData.registrationData.lastName}`;
-
-await homepage.proceedRegisternewUser(username, email);
+await homepage.proceedRegisternewUser();
 await register.registernewUser(testData.registrationData);
 
 // 6. Verify 'ACCOUNT CREATED!' and click 'Continue' button
@@ -56,9 +52,7 @@ console.log(registerCompletedMessage); //print account created message
 await register.completedContinue();
 
 // 7. Verify ' Logged in as username' at top
-const loggedUser = await page.locator("li:has-text('Logged in as')").textContent();
-const expectedloggedUser = `Logged in as ${username}`;
-expect(loggedUser.trim()).toEqual(expectedloggedUser);
+await homepage.verifyLoggedinUser();
 
 // 8. Add products to cart
 // 9. Click 'Cart' button
@@ -116,24 +110,15 @@ const product = new ProductPage(page);
 
 await homepage.navigateTo(testData.environment.sourceURL);
 // 3. Click on 'Products' button
-await page.locator("[href='/products']").click();
-// 4. Verify user is navigated to ALL PRODUCTS page successfully
-const allProductDisplayed = page.getByRole('heading', { name: 'All Products' });
-await expect(allProductDisplayed).toBeVisible();
-const allProductMessage = await allProductDisplayed.textContent();
-expect(allProductMessage ).toEqual("All Products");
-console.log(allProductMessage );
+await homepage.navigateToPage('product');
 
+// 4. Verify user is navigated to ALL PRODUCTS page successfully
+await product.navigateSuccess();
 // 5. Enter product name in search input and click search button
-await page.locator("[id='search_product']").fill("Sleeveless");
-await page.locator("[id='submit_search']").click();
+await product.searchProduct(testData.productData);
 
 // 6. Verify 'SEARCHED PRODUCTS' is visible
-const searchedProductDisplayed = page.getByRole('heading', { name: 'Searched Products' });
-await expect(searchedProductDisplayed).toBeVisible();
-const searchedProductMessage = await searchedProductDisplayed.textContent();
-expect(searchedProductMessage ).toEqual("Searched Products");
-console.log(searchedProductMessage );
+await product.verifyAfterSearch();
 
 // 7. Verify all the products related to search are visible
 // 8. Add those products to cart
@@ -154,7 +139,7 @@ await page.locator("[data-qa='login-password']").fill(testData.loginData.existin
 await page.locator("[data-qa='login-button']").click();
 
 // 11. Again, go to Cart page
-await page.locator("[href='/view_cart']").first().click();
+await homepage.navigateToPage('cart');
 
 // 12. Verify that those products are visible in cart after login as well
 const allCartProducts = page.locator("[class='cart_description']");
@@ -188,15 +173,10 @@ await homepage.navigateTo(testData.environment.sourceURL);
 await expect(page.getByRole('heading', { name: 'Full-Fledged practice website for Automation Engineers' })).toBeVisible();
 
 // 4. Click 'Signup / Login' button
-await page.locator("[href='/login']").click();
+await homepage.navigateToPage('login');
 
 // 5. Fill all details in Signup and create account
-const username = homepage.generateUsername();
-const email = username+"@test.com";
-const cardName = username;
-
-
-await homepage.proceedRegisternewUser(username, email);
+await homepage.proceedRegisternewUser();
 await register.registernewUser(testData.registrationData);
 
 // 6. Verify 'ACCOUNT CREATED!' and click 'Continue' button
@@ -205,9 +185,7 @@ console.log(registerCompletedMessage); //print account created message
 await register.completedContinue();
 
 // 7. Verify ' Logged in as username' at top
-const loggedUser = await page.locator("li:has-text('Logged in as')").textContent();
-const expectedloggedUser = `Logged in as ${username}`;
-expect(loggedUser.trim()).toEqual(expectedloggedUser);
+await homepage.verifyLoggedinUser();
 
 // 8. Add products to cart
 // 9. Click 'Cart' button

@@ -9,24 +9,36 @@ class ProductPage {
     this.allProducts = page.locator(locators.allProducts);
     this.continueModal = page.locator(locators.continueModal);
     this.viewCartModal = page.locator(locators.viewCartModal).nth(1);
-
+    this.search = page.locator("[id='search_product']");
+    this.searchClick = page.locator("[id='submit_search']");
+    this.searchedProductDisplayed = page.getByRole('heading', { name: 'Searched Products' });
+    this.allProductDisplayed = page.getByRole('heading', { name: 'All Products' });
     
 
 
 
 }
 
+async navigateSuccess()
+{
+    const allProductDisplayed = await this.allProductDisplayed;
+    await expect(allProductDisplayed).toBeVisible();
+    const allProductMessage = await allProductDisplayed.textContent();
+    expect(allProductMessage ).toEqual("All Products");
+    console.log(allProductMessage );
+}
+
 
 
 async addSearchedProducttoCart(searchProductData)
 {
-    // 7. Verify all the products related to search are visible
+
     const allProducts = this.allProducts;
     const countProducts = await allProducts.count();
     let productAddToCart = [];
     let productInResult = []
 
-    // 8. Add those products to cart
+
     for (let i = 0; i < countProducts; i++) {
         const productNameElements = await allProducts.nth(i).locator("div p").nth(1).allTextContents();
         
@@ -42,7 +54,7 @@ async addSearchedProducttoCart(searchProductData)
                 await modal.click();
                 console.log("clicked");
                 } else {
-    // 9. Click 'Cart' button and verify that products are visible in cart
+
                 const modal = this.viewCartModal;
                 // await modal.waitFor({ state: 'attached' });
                 await modal.waitFor({ state: 'visible' });
@@ -57,12 +69,33 @@ async addSearchedProducttoCart(searchProductData)
 }
 
 
-async assertProducts(searchProductData) {
+async assertProducts(searchProductData){
     const { productAddToCart, productInResult } = await this.addSearchedProducttoCart(searchProductData);
 
     expect(productInResult).toEqual(searchProductData);
     expect(productAddToCart).toEqual(searchProductData);
 }
+
+
+async searchProduct(data){
+
+    const searchData = this.search.fill(data.searchText);
+    this.searchClick.click();
+    return searchData;
+
+}
+
+async verifyAfterSearch()
+{
+    const searchedProductDisplayed = await this.searchedProductDisplayed;
+    await expect(searchedProductDisplayed).toBeVisible();
+    const searchedProductMessage = await searchedProductDisplayed.textContent();
+    expect(searchedProductMessage ).toEqual("Searched Products");
+    console.log(searchedProductMessage );
+
+}
+
+
 
 
 
