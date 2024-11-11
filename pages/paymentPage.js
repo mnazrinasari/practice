@@ -17,11 +17,11 @@ class PaymentPage {
 
 
 
-async enterPayment(data, username) 
+async enterPayment(data) 
 {
     
     // 14. Enter payment details: Name on Card, Card Number, CVC, Expiration date
-    await this.cardName.fill(username);
+    await this.cardName.fill(data.cardName);
     await this.cardNumber.fill(data.cardNumber);
     await this.cardCVC.fill(data.cardCVC);
     await this.cardExpiryMonth.fill(data.cardExpiryMonth);

@@ -7,7 +7,6 @@ const { ProductPage } = require('../pages/productPage');
 const { PaymentPage } = require('../pages/paymentPage');
 
 
-
 function cleanAddressEntry(entry) {
   return entry.replace(/\s+/g, ' ').trim().replace(/, 0000$/, '');
 }
@@ -46,7 +45,7 @@ await page.locator("[href='/login']").click();
 // 5. Fill all details in Signup and create account
 const username = homepage.generateUsername();
 const email = username+"@test.com";
-const cardName = username;
+const cardName = `${testData.registrationData.firstName} ${testData.registrationData.lastName}`;
 
 await homepage.proceedRegisternewUser(username, email);
 await register.registernewUser(testData.registrationData);
@@ -82,7 +81,7 @@ await page.locator("[class='btn btn-default check_out']").click();
 
 // 14. Enter payment details: Name on Card, Card Number, CVC, Expiration date
 // 15. Click 'Pay and Confirm Order' button
-await payment.enterPayment(testData.cardData, username);
+await payment.enterPayment(testData.cardData);
 
 
 // 16. Verify success message 'Your order has been placed successfully!'
