@@ -31,12 +31,12 @@ module.exports = defineConfig({
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry',
     // Set viewport to null to maximize the browser window
-    viewport: null,
-    launchOptions: {
-      // Start the browser maximized
-      // args: ['--start-maximized'],
-      headless: false
-    }
+    // viewport: null,
+    // launchOptions: {
+    //   // Start the browser maximized
+    //   // args: ['--start-maximized'],
+    //   headless: false
+    // }
   },
 
 
