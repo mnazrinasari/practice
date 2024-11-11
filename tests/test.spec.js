@@ -4,14 +4,8 @@ const testData = require('../testData');
 const { HomePage } = require('../pages/homePage');
 const { RegisterPage } = require('../pages/registerPage');
 const { ProductPage } = require('../pages/productPage');
+const { PaymentPage } = require('../pages/paymentPage');
 
-
-function generateUsername() {
-  const date = new Date();
-  const timestamp = date.getTime();
-  const randomNum = Math.floor(Math.random() * 1000); 
-  return `user_${timestamp}_${randomNum}`;
-}
 
 function cleanAddressEntry(entry) {
   return entry.replace(/\s+/g, ' ').trim().replace(/, 0000$/, '');
@@ -32,12 +26,6 @@ function cleanAddressData(addressArray, unwantedEntry, unwantedPrefix) {
   );
 }
 
-//card data
-const cardNumber = "4444444444444444";
-const cardCVC = "123";
-const cardExpiryMonth = "12";
-const cardExpiryYear = "2030";
-
 
 test('Test Case 15: Place Order: Register before Checkout', async ({ page }) => {
 
@@ -45,6 +33,7 @@ test('Test Case 15: Place Order: Register before Checkout', async ({ page }) => 
 // 2. Navigate to url 'http://automationexercise.com'
 const homepage = new HomePage(page);
 const register = new RegisterPage(page);
+const payment = new PaymentPage(page);
 
 await homepage.navigateTo(testData.environment.sourceURL);
 // 3. Verify that home page is visible successfully
@@ -56,7 +45,7 @@ await page.locator("[href='/login']").click();
 // 5. Fill all details in Signup and create account
 const username = homepage.generateUsername();
 const email = username+"@test.com";
-const cardName = username;
+const cardName = `${testData.registrationData.firstName} ${testData.registrationData.lastName}`;
 
 await homepage.proceedRegisternewUser(username, email);
 await register.registernewUser(testData.registrationData);
@@ -73,7 +62,7 @@ expect(loggedUser.trim()).toEqual(expectedloggedUser);
 
 // 8. Add products to cart
 // 9. Click 'Cart' button
-const addProduct = await homepage.addRandomProductToCart(testData.productData.randomProductData);
+const addProduct = await homepage.addProductToCart(testData.productData.randomProductData);
 console.log(addProduct); //print product added to cart
 
 
@@ -91,14 +80,9 @@ await page.locator("[name='message']").fill("message");
 await page.locator("[class='btn btn-default check_out']").click();
 
 // 14. Enter payment details: Name on Card, Card Number, CVC, Expiration date
-await page.locator("[data-qa='name-on-card']").fill(cardName);
-await page.locator("[data-qa='card-number']").fill(cardNumber);
-await page.locator("[data-qa='cvc']").fill(cardCVC);
-await page.locator("[data-qa='expiry-month']").fill(cardExpiryMonth);
-await page.locator("[data-qa='expiry-year']").fill(cardExpiryYear);
-
 // 15. Click 'Pay and Confirm Order' button
-await page.locator("[data-qa='pay-button']").click();
+await payment.enterPayment(testData.cardData);
+
 
 // 16. Verify success message 'Your order has been placed successfully!'
 //option1
@@ -227,7 +211,7 @@ expect(loggedUser.trim()).toEqual(expectedloggedUser);
 
 // 8. Add products to cart
 // 9. Click 'Cart' button
-const addProduct = await homepage.addRandomProductToCart(testData.productData.randomProductData);
+const addProduct = await homepage.addProductToCart(testData.productData.randomProductData);
 console.log(addProduct); //print product added to cart
 
 

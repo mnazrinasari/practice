@@ -44,7 +44,7 @@ async proceedRegisternewUser(username, email)
 }
 
 
-async addRandomProductToCart(randomProductData)
+async addProductToCart(randomProductData)
 {
     const allProducts = this.allProducts;
     const countProducts = await allProducts.count();

@@ -1,4 +1,3 @@
-// testData.js
 const testData = {
     loginData: {
         existingUsername: "test33@test.com",
@@ -31,20 +30,25 @@ const testData = {
         city: "city",
         zipcode: "0000",
         mobileNumber: "9999",
-        expectedAddress: [
-            "company",
-            "address",
-            "address2",
-            "city state 0000",
-            "Singapore",
-            "9999"
-        ]
+        get expectedAddress() {
+            return [
+                this.company,
+                this.address,
+                this.address2,
+                `${this.city} ${this.state} ${this.zipcode}`,
+                this.country,
+                this.mobileNumber
+            ];
+        }
     },
     cardData: {
         cardNumber: "4444444444444444",
         cardCVC: "123",
         cardExpiryMonth: "12",
-        cardExpiryYear: "2030"
+        cardExpiryYear: "2030",
+        get cardName() {
+            return `${testData.registrationData.firstName} ${testData.registrationData.lastName}`;
+        }
     },
     environment: {
         sourceURL: "http://automationexercise.com"
