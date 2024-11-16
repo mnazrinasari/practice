@@ -5,26 +5,9 @@ const { HomePage } = require('../pages/homePage');
 const { RegisterPage } = require('../pages/registerPage');
 const { ProductPage } = require('../pages/productPage');
 const { PaymentPage } = require('../pages/paymentPage');
+const { CheckoutPage } = require('../pages/checkoutPage');
 
 
-function cleanAddressEntry(entry) {
-  return entry.replace(/\s+/g, ' ').trim().replace(/, 0000$/, '');
-}
-
-function cleanSpecificEntry(retrievedAddress) {
-  return retrievedAddress.map((entry, index) => {
-    if (index === 3) { 
-      return cleanAddressEntry(entry);
-    }
-    return entry;
-  });
-}
-
-function cleanAddressData(addressArray, unwantedEntry, unwantedPrefix) {
-  return addressArray.filter(entry => 
-    entry !== unwantedEntry && !entry.startsWith(unwantedPrefix)
-  );
-}
 
 
 test('Test Case 15: Place Order: Register before Checkout', async ({ page }) => {
@@ -167,6 +150,7 @@ test('Test Case 23: Verify address details in checkout page', async ({ page }) =
 // 2. Navigate to url 'http://automationexercise.com'
 const homepage = new HomePage(page);
 const register = new RegisterPage(page);
+const checkout = new CheckoutPage(page);
 
 await homepage.navigateTo(testData.environment.sourceURL);
 // 3. Verify that home page is visible successfully
@@ -202,40 +186,11 @@ expect(await cartVisible.textContent()).toEqual("Shopping Cart");
 await page.locator("[class='btn btn-default check_out']").click();
 
 // 12. Verify that the delivery address is same address filled at the time registration of account
-const deliveryAddress = page.locator("[id='address_delivery']");
-const deliveryElements = deliveryAddress.locator("li");
-const count = 8;
-let retrievedDeliveryAddress = [];
-for(let i=0; i<count; i++){
-  const addressDetail = await deliveryElements.nth(i).textContent();
-  retrievedDeliveryAddress.push(addressDetail.trim());
-}
-//cleaning the data
-retrievedDeliveryAddress = cleanAddressData(retrievedDeliveryAddress, 'Your delivery address', 'Mr.');
-retrievedDeliveryAddress = cleanSpecificEntry(retrievedDeliveryAddress);
-
-// console.log(retrievedDeliveryAddress);
-// console.log(expectedDeliveryAddress);
-expect(testData.registrationData.expectedAddress).toEqual(retrievedDeliveryAddress);
+await checkout.verifyAddress('delivery', testData.registrationData)
 
 
 // 13. Verify that the billing address is same address filled at the time registration of account
-const billingAddress = page.locator("[id='address_invoice']");
-const billingAddressElements = billingAddress.locator("li");
-const counter = 8;
-let retrievedBillingAddress = [];
-for(let i=0; i<counter; i++){
-  const addressDetail = await billingAddressElements.nth(i).textContent();
-  retrievedBillingAddress.push(addressDetail.trim());
-}
-//cleaning the data
-retrievedBillingAddress = cleanAddressData(retrievedBillingAddress, 'Your billing address', 'Mr.');
-retrievedBillingAddress = cleanSpecificEntry(retrievedBillingAddress);
-
-
-// console.log(retrievedBillingAddress);
-// console.log(expectedBillingAddress);
-expect(testData.registrationData.expectedAddress).toEqual(retrievedBillingAddress);
+await checkout.verifyAddress('billing', testData.registrationData)
 
 // 14. Click 'Delete Account' button
 await page.locator("[href='/delete_account']").click();
